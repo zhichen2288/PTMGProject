@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title%} Dashboard {%endblock%}
+{% block content %}
+This is DashBoard
+<p>{{ message }}</p>
+<form action="{% url 'transcript_handler:dashboard' %}" method="post">
+    <button class="btn btn-primary mb-2">
+        Flush DB
+    </button>
+</form>
+{% endblock %}
