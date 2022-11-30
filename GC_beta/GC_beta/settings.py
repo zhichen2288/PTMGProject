@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'GC_beta.wsgi.application'
 #     }
 # }
 register_connection(alias='default', name='GC_beta', host='localhost', port=27017)
-connect(alias="default")
+connect(db="test", alias="default")
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

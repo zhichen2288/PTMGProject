@@ -511,7 +511,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
             tables_number = len(self.et_sess.ServerResponse.json()['Tables'])
             for i in range(tables_number):
                 tables[i].to_csv(os.path.join(outdir, f'table-{i}.csv'), index=False)
-            with open(outdir + '//server_response.json', 'w', encoding='utf-8') as f:
+            with open(outdir + '\\server_response.json', 'w', encoding='utf-8') as f:
                 json.dump(self.et_sess.ServerResponse.json(), f, ensure_ascii=False, indent=4)
             # return tables_in_json
             return True
@@ -618,7 +618,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
         for i, page in enumerate(doc):
             # page.setRotation(page.rotation)
             pix = page.get_pixmap()
-            pix.save(output_path + "//p%s.png" % (i))
+            pix.save(output_path + "\\p%s.png" % (i))
 
     # for i in range(len(doc)):
     #     for img in doc.get_page_images(i):
@@ -633,19 +633,19 @@ class ExtractTableHandler(GenericTranscriptHandler):
     #         pix = None
 
     def _draw_rectangle_on_image_and_dump(self, base_dir, page_idx, table_idx, coors):
-        student_name = base_dir.split('/')[-1]  # temporary solution, should be passed in
+        student_name = base_dir.split('\\')[-1]  # temporary solution, should be passed in
         input_image_path = os.path.join(base_dir, f"p{page_idx}.png")
         output_image_path = os.path.join(base_dir, f"p{page_idx}-t{table_idx}.png")
         #localhost_image_path = os.path.join("http:\\\\localhost:8080", student_name, f"p{page_idx}-t{table_idx}.png")
-        localhost_image_path = os.path.join("http://localhost:8000/media/", student_name, f"p{page_idx}-t{table_idx}.png")
+        localhost_image_path = os.path.join("http:\\\\localhost:8000\\media\\", student_name, f"p{page_idx}-t{table_idx}.png")
         image = Image.open(input_image_path)
         width, height = image.size
         draw = ImageDraw.Draw(image)
         draw.rectangle((coors[0] * width, coors[1] * height, coors[2] * width, coors[3] * height), outline=128, width=5)
         #     image.show()
         print(f'compressing p{page_idx}-t{table_idx}.png ...')
-        image = image.resize((int(width * 0.7), int(height * 0.7)), Image.ANTIALIAS)
-        image.save(output_image_path, quality=70)
+        #image = image.resize((int(width * 0.7), int(height * 0.7)), Image.ANTIALIAS)
+        image.save(output_image_path, quality=100, subsampling=0)
         return localhost_image_path
 
     def _get_table_border_images(self, input_pdf_path, output_path, server_response, dfs):
