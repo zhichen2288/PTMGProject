@@ -13,6 +13,8 @@ export async function makeData(studentId) {
   };
 }
 
+//Table reducer reference https://github.com/archit-p/editable-react-table
+
 async function getTableData(studentId) {
   let tableArray = [];
   let studentName = "";
@@ -21,9 +23,12 @@ async function getTableData(studentId) {
     `/api/students/${studentId}/transcript?action=view`
   );
   if (response.status === 200) {
-    debugger
+    debugger;
     let data = response.data;
-    if (data.tables.length > 1 && (data.tables[0].modified == undefined || data.tables[0].modified === 0) ) {
+    if (
+      data.tables.length > 0 &&
+      (data.tables[0].modified == undefined || data.tables[0].modified === 0)
+    ) {
       studentName = data.student_name;
       data.tables.map((e) => {
         let tables = {};
@@ -50,7 +55,6 @@ async function getTableData(studentId) {
           }
         });
         rows.push(...rowNames);
-
         parsedColumns.map((n) => {
           let names = {};
           if (n.name !== "") {
@@ -92,7 +96,7 @@ export function shortId() {
 
 export const ActionTypes = Object.freeze({
   UPDATE_TABLE_CONFIG: "update_table_config",
-  ADD_OPTION_TO_COLUMN: "add_option_to_column",
+  ADD_COLOR_TO_CELL: "add_color_to_cell",
   ADD_ROW: "add_row",
   UPDATE_COLUMN_TYPE: "update_column_type",
   UPDATE_COLUMN_HEADER: "update_column_header",
@@ -110,7 +114,6 @@ export const DataTypes = Object.freeze({
   TEXT: "text",
   SELECT: "select",
 });
-
 
 export const universityNames = [
   {
@@ -197,7 +200,3 @@ export const universityNames = [
       "Zhejiang University of Science and TechnologyZhongnan University of Economics and Law",
   },
 ];
-
-
-
-

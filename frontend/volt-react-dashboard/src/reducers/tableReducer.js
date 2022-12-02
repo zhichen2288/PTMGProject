@@ -17,13 +17,15 @@ const initialState = {
 };
 
 function reducer(state, action) {
+  debugger;
   switch (action.type) {
     case ActionTypes.UPDATE_TABLE_CONFIG:
       return produce(state, (draft) => {
         draft.table_idx = action.table_idx;
       });
 
-    case ActionTypes.ADD_OPTION_TO_COLUMN:
+    case ActionTypes.ADD_COLOR_TO_CELL:
+      debugger;
       const optionIndex = state.columns.findIndex(
         (column) => column.id === action.columnId
       );
@@ -35,7 +37,7 @@ function reducer(state, action) {
               $push: [
                 {
                   label: action.option,
-                  backgroundColor: action.backgroundColor,
+                  backgroundColor: "red",
                 },
               ],
             },

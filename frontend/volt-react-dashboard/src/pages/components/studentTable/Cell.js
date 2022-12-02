@@ -48,6 +48,7 @@ export default function Cell({
   }
 
   function onChange(e) {
+    debugger;
     setValue({ value: e.target.value, update: false });
   }
 

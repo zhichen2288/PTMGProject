@@ -1,23 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Breadcrumb,
-  Button,
-  ButtonGroup,
-  Row,
-  Col,
-  InputGroup,
-  Form,
-  Dropdown,
-  Card,
-  Table,
-  Image,
-  DropdownButton,
-  Modal,
-  Spinner,
-  Container,
-  Accordion,
-  FormCheck,
-} from "@themesberg/react-bootstrap";
+import { Button, Row, Col } from "@themesberg/react-bootstrap";
 import { useParams } from "react-router-dom";
 import { JsonToTable } from "react-json-to-table";
 import axios from "../utils/http-axios";

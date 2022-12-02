@@ -370,7 +370,6 @@ export default () => {
                             >
                               test
                             </Dropdown.Item>
-                            <pre>{student.status.localeCompare("NEW")}</pre>
                             {!(student.status.localeCompare("NEW") == 0) && (
                               <Link
                                 className={"dropdown-item"}

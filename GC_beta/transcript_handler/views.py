@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework_mongoengine.viewsets import ModelViewSet, GenericViewSet
 
+from .dataChecker import run_reminder
+
 from .handlers import ExtractTableHandler
 from .models import  ProcessedTable, StudentTable, University, Student, Department, Identifier, Transcript, Education
 from .serializers import UniversitySerializer, StudentSerializer, TranscriptSerializer
@@ -156,6 +158,16 @@ def student_transcript(request, pk):
             processed_transcripts = student.transcript.processed_data
             tables_in_dict = [json.loads(x.to_json()) for x in processed_transcripts]
             return JsonResponse({'student_name': student.name, 'tables': tables_in_dict})
+        elif request.GET.get('action') == 'check_transcript_data':
+            student = None
+            try:
+                student = Student.objects.get(id=pk)
+            except:
+                return JsonResponse({'error': "student not found."}, status=404)
+            processed_data = run_reminder(student.id)
+            print(processed_data)
+            return JsonResponse({'student_name': student.name, 'data':str(processed_data)})
+
         elif request.GET.get('action') == 'viewtables':
             student = None
             try:

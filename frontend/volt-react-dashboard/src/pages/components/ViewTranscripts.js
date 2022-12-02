@@ -19,7 +19,6 @@ import Table from "./Tables";
 import { ActionTypes, makeData } from "../utils/studentTable";
 
 export default () => {
-  debugger
   let params = useParams();
 
   const [state, dispatch] = useReducer(reducer.reducer, reducer.initialState);
@@ -117,16 +116,14 @@ export default () => {
     dispatch({ type: ActionTypes.CALL_API });
     const fetchData = async () => {
       const response = await makeData(params["id"]);
-      if (response.data.length > 1) {
-        debugger
+      if (response.data.length > 0) {
         dispatch({ type: ActionTypes.SUCCESS, data: response.data });
       }
     };
     fetchData();
   }, []);
 
-  async function SaveTableData(e) {
-    debugger
+  async function saveTableData(e) {
     let data = [];
     let stateObject = [...state.data];
 
@@ -145,6 +142,18 @@ export default () => {
         data: data,
       }
     );
+  }
+
+  async function checkTableData(e) {
+    const response = await axios.get(
+      `/api/students/${params["id"]}/transcript?action=check_transcript_data`
+    );
+    if (response.status === 200) {
+      debugger;
+      let data = response.data;
+      console.log("response data", data);
+      dispatch({ type: ActionTypes.ADD_COLOR_TO_CELL, data: response.data });
+    }
   }
 
   function tableUpdate(e, idx) {
@@ -247,7 +256,8 @@ export default () => {
           >
             <Button> View Table Data </Button>
           </Link>
-          <Button onClick={(e) => SaveTableData(e)}>Save Table Data</Button>
+          <Button onClick={(e) => saveTableData(e)}>Save Table Data</Button>
+          <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
         </Col>
       </Row>
     </>
