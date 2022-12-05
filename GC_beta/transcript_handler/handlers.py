@@ -9,6 +9,9 @@ import json
 import pandas as pd
 import re
 import numpy as np
+from pathlib import Path
+from urllib.parse import urljoin
+
 
 
 class ExtractTableHandler(GenericTranscriptHandler):
@@ -37,7 +40,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
         print('preparing images and tables...')
         image_file_paths, table_page_mappings = self._get_table_border_images(paths['input_file_path'],
                                                                               paths['output_dir'], server_response,
-                                                                              table_data)
+                                                                              table_data, student)
         new_processed_tables = self._dump_processed_transcripts_to_ProcessedTable(tables_in_json, image_file_paths,
                                                                                   table_page_mappings)
         student.status = "PREPARED"
@@ -511,7 +514,9 @@ class ExtractTableHandler(GenericTranscriptHandler):
             tables_number = len(self.et_sess.ServerResponse.json()['Tables'])
             for i in range(tables_number):
                 tables[i].to_csv(os.path.join(outdir, f'table-{i}.csv'), index=False)
-            with open(outdir + '\\server_response.json', 'w', encoding='utf-8') as f:
+                data_folder = Path(outdir)
+                file_to_open = data_folder / "server_response.json"
+                f = open(file_to_open, 'w', encoding='utf-8')
                 json.dump(self.et_sess.ServerResponse.json(), f, ensure_ascii=False, indent=4)
             # return tables_in_json
             return True
@@ -632,12 +637,13 @@ class ExtractTableHandler(GenericTranscriptHandler):
     #             pix1 = None
     #         pix = None
 
-    def _draw_rectangle_on_image_and_dump(self, base_dir, page_idx, table_idx, coors):
-        student_name = base_dir.split('\\')[-1]  # temporary solution, should be passed in
+    def _draw_rectangle_on_image_and_dump(self, base_dir, page_idx, table_idx, coors, student):
         input_image_path = os.path.join(base_dir, f"p{page_idx}.png")
         output_image_path = os.path.join(base_dir, f"p{page_idx}-t{table_idx}.png")
         #localhost_image_path = os.path.join("http:\\\\localhost:8080", student_name, f"p{page_idx}-t{table_idx}.png")
-        localhost_image_path = os.path.join("http:\\\\localhost:8000\\media\\", student_name, f"p{page_idx}-t{table_idx}.png")
+        file_path = Path(student.name, f"p{page_idx}-t{table_idx}.png")
+        url = urljoin('http://localhost:8000/media/',str(file_path))
+        localhost_image_path = url
         image = Image.open(input_image_path)
         width, height = image.size
         draw = ImageDraw.Draw(image)
@@ -648,7 +654,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
         image.save(output_image_path, quality=100, subsampling=0)
         return localhost_image_path
 
-    def _get_table_border_images(self, input_pdf_path, output_path, server_response, dfs):
+    def _get_table_border_images(self, input_pdf_path, output_path, server_response, dfs, student):
         """
         0. read pdf and extract iamges
         1. generate base image (on pages)
@@ -662,7 +668,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
         for i, table in enumerate(server_response['Tables']):
             print(f'preparing table {i}')
             coors = self._get_table_coor(i, server_response, dfs)
-            localhost_image_path = self._draw_rectangle_on_image_and_dump(output_path, table["Page"] - 1, i, coors)
+            localhost_image_path = self._draw_rectangle_on_image_and_dump(output_path, table["Page"] - 1, i, coors, student)
             table_page_mappings.append(table["Page"] - 1)
             image_file_paths.append(localhost_image_path)
         return image_file_paths, table_page_mappings

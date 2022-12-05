@@ -23,7 +23,6 @@ async function getTableData(studentId) {
     `/api/students/${studentId}/transcript?action=view`
   );
   if (response.status === 200) {
-    debugger;
     let data = response.data;
     if (
       data.tables.length > 0 &&
@@ -40,33 +39,25 @@ async function getTableData(studentId) {
       });
       tableArray.map((e) => {
         let columnObject = [];
-        let rows = [];
         let columnNames = [];
 
         let parsedColumns = JSON.parse(e.table_data)["schema"]["fields"];
         let rowNames = JSON.parse(e.table_data)["data"];
-
-        rowNames.map((e) => {
-          e["ID"] = faker.mersenne.rand();
-        });
-        rowNames.forEach((element) => {
-          if (element[""] || element[""] === "") {
-            delete element[""];
-          }
-        });
-        rows.push(...rowNames);
+        let colIndex = 0;
         parsedColumns.map((n) => {
           let names = {};
-          if (n.name !== "") {
-            names["id"] = n.name;
-            names["accessor"] = n.name;
+          if (n.name !== "" || n.name !== null) {
+            names["id"] = colIndex.toString();
+            names["accessor"] = colIndex.toString();
             names["label"] = n.name;
             names["width"] = 100;
             names["disableResizing"] = "false";
             names["dataType"] = DataTypes.TEXT;
             columnNames.push(names);
+            colIndex++;
           }
         });
+
         columnNames.push({
           id: 999999,
           width: 20,
@@ -75,7 +66,32 @@ async function getTableData(studentId) {
           dataType: "null",
         });
         columnObject.push(columnNames);
-        e.table_data = { columns: columnNames, data: rowNames };
+
+        rowNames.map((e) => {
+          e["ID"] = faker.mersenne.rand();
+          e["+"] = "-";
+        });
+
+        // rowNames.forEach((element) => {
+        //   if (element[""] || element[""] === "") {
+        //     delete element[""];
+        //   }
+        // });
+        let rowsOffset = [];
+        for (let r = 0; r < rowNames.length; r++) {
+          let row = {};
+          for (let c = 0; c < columnNames.length; c++) {
+            debugger;
+            if (columnNames[c].label == null) {
+              row[c] = rowNames[r]["nan"];
+            } else {
+              row[c] = rowNames[r][columnNames[c].label];
+            }
+          }
+          rowsOffset.push(row);
+        }
+        console.log(rowsOffset);
+        e.table_data = { columns: columnNames, data: rowsOffset };
       });
     } else {
       studentName = data.student_name;

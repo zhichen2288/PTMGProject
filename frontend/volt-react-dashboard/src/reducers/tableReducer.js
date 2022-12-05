@@ -129,7 +129,6 @@ function reducer(state, action) {
       };
 
     case ActionTypes.SUCCESS:
-      debugger;
       return {
         ...state,
         data: action.data,
