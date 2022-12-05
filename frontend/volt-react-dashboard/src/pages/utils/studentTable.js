@@ -65,12 +65,14 @@ async function getTableData(studentId) {
           disableResizing: "true",
           dataType: "null",
         });
-        columnObject.push(columnNames);
-
-        rowNames.map((e) => {
-          e["ID"] = faker.mersenne.rand();
-          e["+"] = "-";
+        columnNames.push({
+          id: 999998,
+          width: 20,
+          label: "Delete",
+          disableResizing: "true",
+          dataType: "options",
         });
+        columnObject.push(columnNames);
 
         // rowNames.forEach((element) => {
         //   if (element[""] || element[""] === "") {
@@ -81,8 +83,8 @@ async function getTableData(studentId) {
         for (let r = 0; r < rowNames.length; r++) {
           let row = {};
           for (let c = 0; c < columnNames.length; c++) {
-            debugger;
             if (columnNames[c].label == null) {
+              debugger;
               row[c] = rowNames[r]["nan"];
             } else {
               row[c] = rowNames[r][columnNames[c].label];
@@ -90,6 +92,9 @@ async function getTableData(studentId) {
           }
           rowsOffset.push(row);
         }
+        rowsOffset.map((e) => {
+          e["Delete"] = "delete";
+        });
         console.log(rowsOffset);
         e.table_data = { columns: columnNames, data: rowsOffset };
       });
