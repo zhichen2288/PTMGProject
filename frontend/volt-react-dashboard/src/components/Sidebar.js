@@ -177,7 +177,7 @@ export default (props = {}) => {
                 image={StevensLogo}
               />
 
-              <NavItem
+              {/* <NavItem
                 title="Overview"
                 link={Routes.DashboardOverview.path}
                 icon={faChartPie}
@@ -186,16 +186,16 @@ export default (props = {}) => {
                 title="Engines"
                 link={Routes.Engines.path}
                 icon={faCogs}
+              ></NavItem> */}
+              <NavItem
+                title="Universities"
+                link={Routes.Universities.path}
+                icon={faUniversity}
               ></NavItem>
               <NavItem
                 title="Students"
                 link={Routes.Students.path}
                 icon={faUserGraduate}
-              ></NavItem>
-              <NavItem
-                title="Universities"
-                link={Routes.Universities.path}
-                icon={faUniversity}
               ></NavItem>
 
               <Dropdown.Divider className="my-3 border-indigo" />

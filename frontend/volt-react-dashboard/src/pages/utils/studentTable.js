@@ -57,21 +57,22 @@ async function getTableData(studentId) {
             colIndex++;
           }
         });
+        columnNames.push({
+          id: "999998",
+          width: 10,
+          label: "",
+          disableResizing: "true",
+          dataType: "options",
+        });
 
         columnNames.push({
-          id: 999999,
-          width: 20,
+          id: "999999",
+          width: 10,
           label: "+",
           disableResizing: "true",
           dataType: "null",
         });
-        columnNames.push({
-          id: 999998,
-          width: 20,
-          label: "Delete",
-          disableResizing: "true",
-          dataType: "options",
-        });
+
         columnObject.push(columnNames);
 
         // rowNames.forEach((element) => {
@@ -92,9 +93,9 @@ async function getTableData(studentId) {
           }
           rowsOffset.push(row);
         }
-        rowsOffset.map((e) => {
-          e["Delete"] = "delete";
-        });
+        // rowsOffset.map((e) => {
+        //   e["Delete"] = "delete";
+        // });
         console.log(rowsOffset);
         e.table_data = { columns: columnNames, data: rowsOffset };
       });
@@ -119,6 +120,7 @@ export const ActionTypes = Object.freeze({
   UPDATE_TABLE_CONFIG: "update_table_config",
   ADD_COLOR_TO_CELL: "add_color_to_cell",
   ADD_ROW: "add_row",
+  DELETE_ROW: "delete_row",
   UPDATE_COLUMN_TYPE: "update_column_type",
   UPDATE_COLUMN_HEADER: "update_column_header",
   UPDATE_CELL: "update_cell",

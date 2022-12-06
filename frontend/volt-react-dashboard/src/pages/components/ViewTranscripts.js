@@ -149,7 +149,6 @@ export default () => {
       `/api/students/${params["id"]}/transcript?action=check_transcript_data`
     );
     if (response.status === 200) {
-      debugger;
       let data = response.data;
       console.log("response data", data);
       dispatch({ type: ActionTypes.ADD_COLOR_TO_CELL, data: response.data });
@@ -175,15 +174,15 @@ export default () => {
             <Breadcrumb.Item active>Prepared Transcripts</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Prepared Transcripts</h4>
-          <p className="mb-0">
+          {/* <p className="mb-0">
             You are viewing the processed transcript of student [{studentName}].
-          </p>
+          </p> */}
         </div>
-        <div className="btn-toolbar mb-2 mb-md-0">
+        {/* <div className="btn-toolbar mb-2 mb-md-0">
           <Button variant="primary" size="sm">
             <FontAwesomeIcon icon={faPlus} className="me-2" /> Add New Student
           </Button>
-        </div>
+        </div> */}
       </div>
       <Accordion defaultActiveKey="0">
         {state.data &&
@@ -247,19 +246,25 @@ export default () => {
             );
           })}
       </Accordion>
-      <Row>
-        <Col>
-          <Link
-            to={{
-              pathname: `/ViewTableData/${params["id"]}`,
-            }}
-          >
-            <Button> View Table Data </Button>
-          </Link>
-          <Button onClick={(e) => saveTableData(e)}>Save Table Data</Button>
-          <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
-        </Col>
-      </Row>
+      <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+        <Row xs="auto">
+          <Col>
+            <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
+          </Col>
+          <Col>
+            <Button onClick={(e) => saveTableData(e)}>Save Table Data</Button>
+          </Col>
+          <Col>
+            <Link
+              to={{
+                pathname: `/ViewTableData/${params["id"]}`,
+              }}
+            >
+              <Button> View Table Data </Button>
+            </Link>
+          </Col>
+        </Row>
+      </div>
     </>
   );
 };

@@ -3,6 +3,9 @@ import ContentEditable from "react-contenteditable";
 import { usePopper } from "react-popper";
 import { ActionTypes, DataTypes } from "../../utils/studentTable";
 import "../../../scss/style.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinusSquare } from "@fortawesome/free-solid-svg-icons";
+
 export default function Cell({
   value: initialValue,
   row: { index },
@@ -68,7 +71,6 @@ export default function Cell({
   }, [addSelectRef, showAdd]);
 
   let element;
-  debugger;
   switch (dataType) {
     case "text":
       element = (
@@ -83,16 +85,19 @@ export default function Cell({
     case "options":
       element = (
         <span
-          style={{
-            cursor: "pointer",
-            color: "blue",
-            textDecoration: "underline",
-          }}
+          className="delete-row-btn"
           onClick={() => {
-            alert("clicked");
+            let result = window.confirm("Are you sure you want to delete?");
+            if (result) {
+              dataDispatch({
+                type: ActionTypes.DELETE_ROW,
+                rowIndex: index,
+              });
+            }
           }}
+          title="Delete row"
         >
-          Delete
+          <FontAwesomeIcon icon={faMinusSquare} />
         </span>
       );
       break;

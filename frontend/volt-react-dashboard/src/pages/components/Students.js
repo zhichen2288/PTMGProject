@@ -227,7 +227,6 @@ export default () => {
             <Breadcrumb.Item active>Students List</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Students List</h4>
-          <p className="mb-0">The students sitting in our Database.</p>
         </div>
         <div className="btn-toolbar mb-2 mb-md-0">
           <Link
@@ -325,7 +324,7 @@ export default () => {
               <thead>
                 <tr>
                   <th className="border-bottom">Name</th>
-                  <th className="border-bottom">GPA</th>
+                  {/* <th className="border-bottom">GPA</th> */}
                   <th className="border-bottom">University</th>
                   <th className="border-bottom">Department</th>
                   <th className="border-bottom">Status</th>
@@ -344,7 +343,7 @@ export default () => {
                           </div>
                         </Card.Link>
                       </td>
-                      <td>{student["gpa"] != 0 ? student["gpa"] : "N/A"}</td>
+                      {/* <td>{student["gpa"] != 0 ? student["gpa"] : "N/A"}</td> */}
                       <td>{student.education.university}</td>
                       <td>{student.education.department}</td>
                       <td>{student.status}</td>
@@ -352,7 +351,7 @@ export default () => {
                         <ButtonGroup className="me-2" aria-label="Actions">
                           <DropdownButton
                             as={ButtonGroup}
-                            title="Transcripts"
+                            title="Process"
                             id="bg-nested-dropdown"
                           >
                             <Dropdown.Item
@@ -362,18 +361,38 @@ export default () => {
                             >
                               Upload
                             </Dropdown.Item>
+
                             <Dropdown.Item
+                              student-id={student.id}
                               onClick={() => {
-                                console.log(`/view-transcripts/${student.id}`);
-                                changeStudentStatus(idx, "ABC");
+                                handlePrepareTranscripts(idx, student.id);
                               }}
                             >
-                              test
+                              Prepare
                             </Dropdown.Item>
+                            {/* {!(student.status.localeCompare("NEW") === 0) && (
+                              <Dropdown.Item
+                                student-id={student.id}
+                                onClick={() => {
+                                  handleCalculateGPA(idx, student.id);
+                                }}
+                              >
+                                Calculate GPA
+                              </Dropdown.Item>
+                            )} */}
+                          </DropdownButton>
+
+                          <DropdownButton
+                            as={ButtonGroup}
+                            title="Transcripts"
+                            id="bg-nested-dropdown"
+                          >
                             {!(student.status.localeCompare("NEW") == 0) && (
                               <Link
                                 className={"dropdown-item"}
-                                // disabled={student.status.localeCompare("PREPARED")}
+                                // disabled={
+                                //   student.status.localeCompare("NEW") === 0
+                                // }
                                 to={{
                                   pathname: `/view-transcripts/${student.id}`,
                                 }}
@@ -387,9 +406,9 @@ export default () => {
                             title="Edit"
                             id="bg-nested-dropdown"
                           >
-                            <Dropdown.Item student-id={student.id}>
+                            {/* <Dropdown.Item student-id={student.id}>
                               Update
-                            </Dropdown.Item>
+                            </Dropdown.Item> */}
                             <Dropdown.Item
                               onClick={() =>
                                 handleDeleteStudent(idx, student.id)
@@ -397,30 +416,6 @@ export default () => {
                             >
                               Remove
                             </Dropdown.Item>
-                          </DropdownButton>
-                          <DropdownButton
-                            as={ButtonGroup}
-                            title="Process"
-                            id="bg-nested-dropdown"
-                          >
-                            <Dropdown.Item
-                              student-id={student.id}
-                              onClick={() => {
-                                handlePrepareTranscripts(idx, student.id);
-                              }}
-                            >
-                              Prepare
-                            </Dropdown.Item>
-                            {!(student.status.localeCompare("NEW") === 0) && (
-                              <Dropdown.Item
-                                student-id={student.id}
-                                onClick={() => {
-                                  handleCalculateGPA(idx, student.id);
-                                }}
-                              >
-                                Calculate GPA
-                              </Dropdown.Item>
-                            )}
                           </DropdownButton>
                         </ButtonGroup>
                       </td>
@@ -510,22 +505,6 @@ export default () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <Button
-        onClick={(e) => {
-          setLoading(!loading);
-        }}
-      >
-        test loading
-      </Button>
-      <Button
-        onClick={(e) => {
-          changeStudentStatus(5, "gpa", 123);
-          changeStudentStatus(5, "status", "PREPARED");
-        }}
-      >
-        test change status
-      </Button>
     </>
   );
 };
