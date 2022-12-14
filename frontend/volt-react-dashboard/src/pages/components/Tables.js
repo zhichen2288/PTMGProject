@@ -46,6 +46,7 @@ export default function Table({
       data,
       defaultColumn,
       dataDispatch,
+      table_idx,
       autoResetRowState: !skipReset,
     },
     useBlockLayout,
@@ -113,8 +114,11 @@ export default function Table({
               })
             }
           >
-            <span className="svg-icon svg-gray icon-margin">
-              <FontAwesomeIcon icon={faPlusSquare} style={{ color: "green" }} />
+            <span
+              className="svg-icon svg-gray icon-margin"
+              title="Add new column"
+            >
+              <FontAwesomeIcon icon={faPlusSquare} style={{ color: "green" }} />{" "}
             </span>
             New
           </div>

@@ -372,3 +372,10 @@ html {
   color: red;
   padding-top: 10px;
 }
+
+.invalidCell-false {
+  background-color: white;
+}
+.invalidCell-true {
+  background-color: red;
+}

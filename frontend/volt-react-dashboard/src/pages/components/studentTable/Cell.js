@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import ContentEditable from "react-contenteditable";
 import { usePopper } from "react-popper";
 import { ActionTypes, DataTypes } from "../../utils/studentTable";
 import "../../../scss/style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinusSquare } from "@fortawesome/free-solid-svg-icons";
+import StateContext from "../../../context/stateContext";
 
 export default function Cell({
   value: initialValue,
   row: { index },
   column: { id, dataType, options },
   dataDispatch,
+  table_idx,
 }) {
   const [value, setValue] = useState({ value: initialValue, update: false });
   const [selectRef, setSelectRef] = useState(null);
@@ -21,6 +23,7 @@ export default function Cell({
     placement: "bottom-start",
     strategy: "fixed",
   });
+  const context = useContext(StateContext);
 
   function handleOptionKeyDown(e) {
     if (e.key === "Enter") {
@@ -70,127 +73,65 @@ export default function Cell({
     }
   }, [addSelectRef, showAdd]);
 
-  let element;
-  switch (dataType) {
-    case "text":
-      element = (
-        <ContentEditable
-          html={(value.value && value.value.toString()) || ""}
-          onChange={onChange}
-          onBlur={() => setValue((old) => ({ value: old.value, update: true }))}
-          className="data-input"
-        />
-      );
-      break;
-    case "options":
-      element = (
-        <span
-          className="delete-row-btn"
-          onClick={() => {
-            let result = window.confirm("Are you sure you want to delete?");
-            if (result) {
-              dataDispatch({
-                type: ActionTypes.DELETE_ROW,
-                rowIndex: index,
-              });
+  function getCellElement() {
+    let columnId = id;
+    let rowId = index;
+    let invalidCell = false;
+    let message = "";
+    if (context.state.highlightCellData !== "") {
+      for (const [key, value] of Object.entries(
+        context.state.highlightCellData
+      )) {
+        for (const [k, v] of Object.entries(value)) {
+          if (key === table_idx.toString()) {
+            if (k !== "message") {
+              const invalidRows = v;
+
+              if (columnId === k && invalidRows.includes(rowId)) {
+                invalidCell = true;
+              }
+            } else {
+              message = v.toString();
             }
-          }}
-          title="Delete row"
-        >
-          <FontAwesomeIcon icon={faMinusSquare} />
-        </span>
-      );
-      break;
-    case "select":
-      // element = (
-      //   <>
-      //     <div
-      //       ref={setSelectRef}
-      //       className="cell-padding d-flex cursor-default align-items-center flex-1"
-      //       onClick={() => setShowSelect(true)}
-      //     >
-      //       {value.value && (
-      //         <Relationship value={value.value} backgroundColor={getColor()} />
-      //       )}
-      //     </div>
-      //     {showSelect && (
-      //       <div className="overlay" onClick={() => setShowSelect(false)} />
-      //     )}
-      //     {showSelect && (
-      //       <div
-      //         className="shadow-5 bg-white border-radius-md"
-      //         ref={setSelectPop}
-      //         {...attributes.popper}
-      //         style={{
-      //           ...styles.popper,
-      //           zIndex: 4,
-      //           minWidth: 200,
-      //           maxWidth: 320,
-      //           padding: "0.75rem",
-      //         }}
-      //       >
-      //         <div
-      //           className="d-flex flex-wrap-wrap"
-      //           style={{ marginTop: "-0.5rem" }}
-      //         >
-      //           {options.map((option) => (
-      //             <div
-      //               className="cursor-pointer"
-      //               style={{ marginRight: "0.5rem", marginTop: "0.5rem" }}
-      //               onClick={() => {
-      //                 setValue({ value: option.label, update: true });
-      //                 setShowSelect(false);
-      //               }}
-      //             >
-      //               <Relationship
-      //                 value={option.label}
-      //                 backgroundColor={option.backgroundColor}
-      //               />
-      //             </div>
-      //           ))}
-      //           {showAdd && (
-      //             <div
-      //               style={{
-      //                 marginRight: "0.5rem",
-      //                 marginTop: "0.5rem",
-      //                 width: 120,
-      //                 padding: "2px 4px",
-      //                 backgroundColor: grey(200),
-      //                 borderRadius: 4,
-      //               }}
-      //             >
-      //               <input
-      //                 type="text"
-      //                 className="option-input"
-      //                 onBlur={handleOptionBlur}
-      //                 ref={setAddSelectRef}
-      //                 onKeyDown={handleOptionKeyDown}
-      //               />
-      //             </div>
-      //           )}
-      //           <div
-      //             className="cursor-pointer"
-      //             style={{ marginRight: "0.5rem", marginTop: "0.5rem" }}
-      //             onClick={handleAddOption}
-      //           >
-      //             <Relationship
-      //               value={
-      //                 <span className="svg-icon-sm svg-text">
-      //                   <PlusIcon />
-      //                 </span>
-      //               }
-      //               backgroundColor={grey(200)}
-      //             />
-      //           </div>
-      //         </div>
-      //       </div>
-      //     )}
-      //   </>
-      // );
-      break;
-    default:
-      element = <span></span>;
-      break;
+          }
+        }
+      }
+    }
+
+    switch (dataType) {
+      case "text":
+        return (
+          <ContentEditable
+            title={message === "" ? "" : message}
+            html={(value.value && value.value.toString()) || ""}
+            onChange={onChange}
+            onBlur={() =>
+              setValue((old) => ({ value: old.value, update: true }))
+            }
+            className={`data-input invalidCell-${invalidCell}`}
+          />
+        );
+      case "options":
+        return (
+          <span
+            className="delete-row-btn"
+            onClick={() => {
+              let result = window.confirm("Are you sure you want to delete?");
+              if (result) {
+                dataDispatch({
+                  type: ActionTypes.DELETE_ROW,
+                  rowIndex: index,
+                });
+              }
+            }}
+            title="Delete row"
+          >
+            <FontAwesomeIcon icon={faMinusSquare} />
+          </span>
+        );
+      default:
+        return <span></span>;
+    }
   }
 
   useEffect(() => {
@@ -208,5 +149,5 @@ export default function Cell({
     }
   }, [value, dataDispatch, id, index]);
 
-  return element;
+  return getCellElement();
 }

@@ -15,6 +15,7 @@ import axios from "../utils/http-axios";
 import { JsonToTable } from "react-json-to-table";
 //Ry
 import reducer from "../reducers/tableReducer";
+import StateContext from "../../context/stateContext";
 import Table from "./Tables";
 import { ActionTypes, makeData } from "../utils/studentTable";
 
@@ -124,6 +125,9 @@ export default () => {
   }, []);
 
   async function saveTableData(e) {
+    debugger;
+    let result = window.confirm("Please make sure all changes are correct!");
+    if (!result) return;
     let data = [];
     let stateObject = [...state.data];
 
@@ -145,14 +149,22 @@ export default () => {
   }
 
   async function checkTableData(e) {
-    const response = await axios.get(
-      `/api/students/${params["id"]}/transcript?action=check_transcript_data`
-    );
-    if (response.status === 200) {
-      let data = response.data;
-      console.log("response data", data);
-      dispatch({ type: ActionTypes.ADD_COLOR_TO_CELL, data: response.data });
-    }
+    // const response = await axios.get(
+    //   `/api/students/${params["id"]}/transcript?action=check_transcript_data`
+    // );
+    // if (response.status === 200) {
+    // let data = response.data;
+    // console.log("response data", data);
+    let data = {
+      0: {
+        message: ["score data type", "course data type"],
+        3: [1, 3, 2],
+        1: [0, 1, 2],
+      },
+      1: { message: ["score data type", "course data type"], 3: [5, 6] },
+    };
+    dispatch({ type: ActionTypes.HIGHLIGHT_CELL, data: data });
+    // }
   }
 
   function tableUpdate(e, idx) {
@@ -160,7 +172,7 @@ export default () => {
   }
 
   return (
-    <>
+    <StateContext.Provider value={{ state, dispatch }}>
       <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
         <div className="mb-4 mb-lg-0">
           <Breadcrumb
@@ -207,25 +219,12 @@ export default () => {
                     </Col>
                     {/* Ry*/}
                     <Col>
-                      {/* <BootstrapTable
-                      key={`$(table.page) "+" $(table.table_num)`}
-                      keyField="index"
-                      data={JSON.parse(table.table_data)["data"]}
-                      columns={newColumnNames}
-                      // cellEdit={cellEditFactory({
-                      //   mode: "click",
-                      //   blurToSave: true,
-                      // })}
-                    /> */}
                       {/* <JsonToTable
                       hover
                       className="user-table align-items-center"
                       json={table.table_data.data}
                     /> */}
-                      {/* 
-                    <Button type="submit" id="btn" onClick={onSaveData}>
-                      save
-                    </Button> */}
+
                       <Table
                         columns={table.table_data.columns}
                         data={table.table_data.data}
@@ -265,6 +264,6 @@ export default () => {
           </Col>
         </Row>
       </div>
-    </>
+    </StateContext.Provider>
   );
 };

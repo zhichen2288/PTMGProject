@@ -80,12 +80,12 @@ async function getTableData(studentId) {
         //     delete element[""];
         //   }
         // });
+
         let rowsOffset = [];
         for (let r = 0; r < rowNames.length; r++) {
           let row = {};
-          for (let c = 0; c < columnNames.length; c++) {
+          for (let c = 0; c < columnNames.length - 2; c++) {
             if (columnNames[c].label == null) {
-              debugger;
               row[c] = rowNames[r]["nan"];
             } else {
               row[c] = rowNames[r][columnNames[c].label];
@@ -94,7 +94,7 @@ async function getTableData(studentId) {
           rowsOffset.push(row);
         }
         // rowsOffset.map((e) => {
-        //   e["Delete"] = "delete";
+        //   e["background"] = [];
         // });
         console.log(rowsOffset);
         e.table_data = { columns: columnNames, data: rowsOffset };
@@ -113,12 +113,12 @@ async function getTableData(studentId) {
 }
 
 export function shortId() {
-  return "_" + Math.random().toString(36).substr(2, 9);
+  return "_" + Math.random().toString(36).substring(2, 9);
 }
 
 export const ActionTypes = Object.freeze({
   UPDATE_TABLE_CONFIG: "update_table_config",
-  ADD_COLOR_TO_CELL: "add_color_to_cell",
+  HIGHLIGHT_CELL: "highlight_cell",
   ADD_ROW: "add_row",
   DELETE_ROW: "delete_row",
   UPDATE_COLUMN_TYPE: "update_column_type",
@@ -175,6 +175,7 @@ export const universityNames = [
   },
   { value: "Mumbai University", label: "Mumbai University" },
   { value: "NMIMS University", label: "NMIMS University" },
+  { value: "Other", label: "Other" },
   { value: "Pune University", label: "Pune University" },
   {
     value: "Ramrao Adik Institute of Technology",
