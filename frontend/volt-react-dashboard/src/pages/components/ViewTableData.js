@@ -26,7 +26,7 @@ export default () => {
     //   // response.data.tables.forEach((e) => {
     //   //   delete e._id;
     //   });
-
+    debugger;
     setTables(JSON.parse(response.data["tables"]));
     setStudentName(response.data["student_name"]);
     //      })
