@@ -3,12 +3,7 @@ import numpy as np
 import pymongo
 from bson.objectid import ObjectId
 import json
-<<<<<<< HEAD
-import System_School_Template
-import System_Data_Check
-=======
 from .System_Data_Check import DataCheck
->>>>>>> shreyas
 
 
 def get_page_data(sid):
@@ -115,11 +110,7 @@ def run_data_check(sid):
     for i in range(len(table_list)):
         id_list = find_id(table_list[i])
         
-<<<<<<< HEAD
-        data_check_obj = System_Data_Check.DataCheck(school_name, table_list[i])
-=======
         data_check_obj = DataCheck(school_name, table_list[i])
->>>>>>> shreyas
         
         table_outlier = []
         
@@ -127,11 +118,7 @@ def run_data_check(sid):
         
         if outlier_score_dtype:     
             outlier_idx_sd = outlier_score_dtype[1]
-<<<<<<< HEAD
-            outlier_id_sd = query_score
-=======
             outlier_id_sd = id_list[0]
->>>>>>> shreyas
             outlier_info_sd = ["invalid score data type", outlier_id_sd, outlier_idx_sd]
 
             if len(outlier_idx_sd) != 0: 
@@ -142,11 +129,7 @@ def run_data_check(sid):
         
         if outlier_credit_dtype:
             outlier_idx_cd = outlier_credit_dtype[1]
-<<<<<<< HEAD
-            outlier_id_cd = query_credit
-=======
             outlier_id_cd = id_list[1]
->>>>>>> shreyas
             outlier_info_cd = ["invalid credit data type", outlier_id_cd, outlier_idx_cd]
 
             if len(outlier_idx_cd) != 0:
@@ -157,11 +140,7 @@ def run_data_check(sid):
         
         if outlier_score_range:
             outlier_idx_sr = outlier_score_range[1]
-<<<<<<< HEAD
-            outlier_id_sr = query_score
-=======
             outlier_id_sr = id_list[0]
->>>>>>> shreyas
             outlier_info_sr = ["invalid score range", outlier_id_sr, outlier_idx_sr]
             
             if len(outlier_idx_sr) != 0:
@@ -172,11 +151,7 @@ def run_data_check(sid):
         
         if outlier_credit_range:
             outlier_idx_cr = outlier_credit_range[1]
-<<<<<<< HEAD
-            outlier_id_cr = query_credit
-=======
             outlier_id_cr = id_list[1]
->>>>>>> shreyas
             outlier_info_cr = ["invalid credit range", outlier_id_cr, outlier_idx_cr]
 
             if len(outlier_idx_cr) != 0:
@@ -187,11 +162,7 @@ def run_data_check(sid):
         
         if outlier_existence_grade:
             outlier_idx_eg = outlier_existence_grade[1]
-<<<<<<< HEAD
-            outlier_id_eg = query_grade
-=======
             outlier_id_eg = id_list[2]
->>>>>>> shreyas
             outlier_info_eg = ["non existence grade", outlier_id_eg, outlier_idx_eg]
             
             if len(outlier_idx_eg) != 0:
@@ -208,13 +179,9 @@ def run_data_check(sid):
                 i_column_mol = i_column + 7*(j+1)
                 outlier_list[i_column_mol] = table_outlier[j][2]
 
-<<<<<<< HEAD
-        total_outlier_list[idx_table] = outlier_list
-=======
         total_outlier_list[i] = outlier_list
 
     total_outlier_list = json.dumps(total_outlier_list)
->>>>>>> shreyas
         
     return total_outlier_list
         

@@ -3,11 +3,7 @@ import numpy as np
 import pymongo
 from bson.objectid import ObjectId
 import json
-<<<<<<< HEAD
-import System_School_Template
-=======
 from .System_School_Template import SchoolTemplate
->>>>>>> shreyas
 
 
 def get_page_data(sid):
@@ -76,11 +72,7 @@ def run_school_template(sid):
         i_table = table_list[i]
 
         # initialize object
-<<<<<<< HEAD
-        school_obj = System_School_Template.SchoolTemplate(school_name, i_table)
-=======
         school_obj = SchoolTemplate(school_name, i_table)
->>>>>>> shreyas
         try:
             i_table_df = school_obj.apply_school_template()
         except Exception:
