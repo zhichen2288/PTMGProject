@@ -149,22 +149,25 @@ export default () => {
   }
 
   async function checkTableData(e) {
-    // const response = await axios.get(
-    //   `/api/students/${params["id"]}/transcript?action=check_transcript_data`
-    // );
-    // if (response.status === 200) {
-    // let data = response.data;
-    // console.log("response data", data);
-    let data = {
-      0: {
-        message: ["score data type", "course data type"],
-        3: [1, 3, 2],
-        1: [0, 1, 2],
-      },
-      1: { message: ["score data type", "course data type"], 3: [5, 6] },
-    };
-    dispatch({ type: ActionTypes.HIGHLIGHT_CELL, data: data });
-    // }
+    const response = await axios.get(
+      `/api/students/${params["id"]}/transcript?action=check_transcript_data`
+    );
+    if (response.status === 200) {
+      let data = response.data;
+      console.log("response data", JSON.parse(data.data));
+      // let data = {
+      //   0: {
+      //     message: ["score data type", "course data type"],
+      //     3: [1, 3, 2],
+      //     1: [0, 1, 2],
+      //   },
+      //   1: { message: ["score data type", "course data type"], 3: [5, 6] },
+      // };
+      dispatch({
+        type: ActionTypes.HIGHLIGHT_CELL,
+        data: JSON.parse(data.data),
+      });
+    }
   }
 
   function tableUpdate(e, idx) {

@@ -9,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework_mongoengine.viewsets import ModelViewSet, GenericViewSet
 
-from .dataChecker import run_reminder
+from .Run_Data_Check import run_data_check
+from .Run_School_Template import run_school_template
 
 from .handlers import ExtractTableHandler
 from .models import  ProcessedTable, StudentTable, University, Student, Department, Identifier, Transcript, Education
@@ -18,7 +19,7 @@ from .utils import extract_pages_from_raw_file, get_transcripts_and_dump_into_di
 from GC_beta.settings import BASE_DIR
 import json
 from bson.json_util import dumps
-from .run import run_class, run_gpa
+from .System_GPA import GPA
 
 
 
@@ -171,7 +172,7 @@ def student_transcript(request, pk):
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
-            processed_data = run_reminder(student.id)
+            processed_data = run_data_check(student.id)
             print(processed_data)
             return JsonResponse({'student_name': student.name, 'data':str(processed_data)})
 
@@ -182,8 +183,9 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
             
-            df, consolidatedData = run_class(pk)
-            student.consolidatedData = json.dumps(consolidatedData['data']) 
+            df = run_school_template(student.id)
+            #student.consolidatedData = json.dumps(consolidatedData['data']) 
+            student.consolidatedData = df.to_json(orient = 'records')
             student.save()
             #processed_transcripts = StudentTable.objects.all()
             processed_transcripts = student.consolidatedData
@@ -197,9 +199,9 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
         
-            df, consolidatedData = run_class(pk)
-            result = run_gpa(student.education.university, df)
-            return JsonResponse({'student_name': student.name, 'result': result})
+            df = run_school_template(student.id)
+            result = GPA(student.education.university, df)
+            return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
 
     elif request.method == 'POST':  # add new transcripts, default is override
         pages = list(map(int, request.POST['validPages'].split(',')))

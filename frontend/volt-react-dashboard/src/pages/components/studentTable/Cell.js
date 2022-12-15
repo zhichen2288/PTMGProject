@@ -82,12 +82,13 @@ export default function Cell({
       for (const [key, value] of Object.entries(
         context.state.highlightCellData
       )) {
-        for (const [k, v] of Object.entries(value)) {
+        for (let [k, v] of Object.entries(value)) {
           if (key === table_idx.toString()) {
             if (k !== "message") {
+              k = parseInt(k);
+              k = k % 7;
               const invalidRows = v;
-
-              if (columnId === k && invalidRows.includes(rowId)) {
+              if (columnId === k.toString() && invalidRows.includes(rowId)) {
                 invalidCell = true;
               }
             } else {

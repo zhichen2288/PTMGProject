@@ -359,7 +359,7 @@ export default () => {
                         <ButtonGroup className="me-2" aria-label="Actions">
                           <Button
                             title="Upload"
-                            eventKey="1"
+                            eventkey="1"
                             onClick={(e) => {
                               handleUploadTranscripts(e, idx, student.id);
                             }}
@@ -385,6 +385,23 @@ export default () => {
 
                           <DropdownButton
                             as={ButtonGroup}
+                            title="Edit"
+                            id="bg-nested-dropdown"
+                          >
+                            {/* <Dropdown.Item student-id={student.id}>
+                              Update
+                            </Dropdown.Item> */}
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleDeleteStudent(idx, student.id)
+                              }
+                            >
+                              Remove
+                            </Dropdown.Item>
+                          </DropdownButton>
+
+                          <DropdownButton
+                            as={ButtonGroup}
                             title="Transcripts"
                             id="bg-nested-dropdown"
                           >
@@ -403,23 +420,6 @@ export default () => {
                             ) : (
                               <span> No transcripts found! </span>
                             )}
-                          </DropdownButton>
-
-                          <DropdownButton
-                            as={ButtonGroup}
-                            title="Edit"
-                            id="bg-nested-dropdown"
-                          >
-                            {/* <Dropdown.Item student-id={student.id}>
-                              Update
-                            </Dropdown.Item> */}
-                            <Dropdown.Item
-                              onClick={() =>
-                                handleDeleteStudent(idx, student.id)
-                              }
-                            >
-                              Remove
-                            </Dropdown.Item>
                           </DropdownButton>
                         </ButtonGroup>
                       </td>

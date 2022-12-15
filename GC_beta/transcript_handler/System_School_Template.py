@@ -4,7 +4,7 @@ import numpy as np
 import pymongo
 
 
-class SchoolTemplate():
+class SchoolTemplate:
     
     def __init__(self, school_name, table_data):
         self.school_name = school_name
@@ -14,14 +14,16 @@ class SchoolTemplate():
     '''
     data format
 
-    {'columns': [{"id": "index", ...},
-                 {"id": "course title", ...},
-                 {"id": "score", ...},
-                 {"id": "credit", ...}
+    {'columns': [{"id": "0", "label": "index", ...},
+                 {"id": "1", "label": "Course Title", ...},
+                 {"id": "2", "label": "Credit", ...},
+                 {"id": "3", "label": "Score" ...},
+                 {"id": 999999, "label": "+"},
+                 {"id": 999998, "label": "Delete"}
                 ],
 
-     "data": [{"course title": "ct1", "score": s1, "credit": c1},
-              {"course title": "ct2", "score": s2, "credit": c2}
+     "data": [{"0": "1", "1": "course_1", "2": "credit_1", "3": "score_1"},
+              {"0": "2", "1": "course_2", "2": "credit_2", "3": "score_2"}
              ]
 
     }
@@ -32,86 +34,76 @@ class SchoolTemplate():
     def use_score_base_single_combo(self, table_data):
         
         '''
-        prepare the candidate list
+        prepare the synonym list
         '''
-        course = ["course title", "course titles", "course", "courses", 
-                  "module title", "subject name",
-                  "subject", "subject title", "subjects",
-                  "course name", "heads of passing"]
+        course_synonym = ["course title", "course titles", "course", "courses", 
+                          "module title", "subject name",
+                          "subject", "subject title", "subjects",
+                          "course name", "heads of passing"]
 
-        score = ["score", "mark", "scores", "marks obtained", 
-                 "obt", "marks obtained", "record", "scroe"]
+        score_synonym = ["score", "mark", "scores", "marks obtained", 
+                         "obt", "marks obtained", "record", "scroe"]
 
-        credit = ["credit", "unit attempted", "credits", 
-                  "units", "cr", "course credits"]
+        credit_synonym = ["credit", "unit attempted", "credits", 
+                          "units", "cr", "course credits"]
 
-#         grade_point = ["grade point", "gradepoint", "spi", "grade",
-#                        "grade points", "gpa", "aggregate marks/cgpa", "grade pt(G)", "grade point (g)"]
+        max_mark_synonym = ["maximum marks", "max"]
 
-        max_mark = ["maximum marks", "max"]
-    
-        min_mark = ["minimum marks", "min"]
-    
-        class_format = ["format"]
+        min_mark_synonym = ["minimum marks", "min"]
+
+        class_format_synonym = ["format"]
 
 
         
         '''
-        extract table data schema 
+        extract id and column name
         '''
-        schema = table_data['columns']
+        id_colname = []
+        for i_col_dict in table_data["columns"]:
+            id_colname.append((i_col_dict["id"] ,i_col_dict["label"]))
 
-        column_name = []
-
-        for i_schema in schema:
-            column_name.append(i_schema["id"])
-        
-        # deal with the last + column
-        column_name.pop()
-         
     
         '''
         prepare the query
         '''
         query_course = []
-        query_score = ""
-        query_credit = ""
-#         query_grade_point = ""
-        query_min_mark = ""
-        query_max_mark = ""
-        query_class_format = ""
+        query_score = []
+        query_credit = []
+        query_min_mark = []
+        query_max_mark = []
+        query_class_format = []
 
-    
-        
-        for i_column_name in column_name:
-            
+        for i_id_colname in id_colname:
+            # extract the id
+            i_id = i_id_colname[0]
+            # extract the column name
+            i_colname = i_id_colname[1]
+
             # standardize format
-            column = i_column_name.lower()
+            i_colname = i_colname.lower()
 
-            if column in course:
-                query_course.append(i_column_name)
-            elif column in score:
-                query_score = i_column_name
-            elif column in credit:
-                query_credit = i_column_name
-#             elif column in grade_point:
-#                 query_grade_point = i_column_name
-            elif column in min_mark:
-                query_min_mark = i_column_name
-            elif column in max_mark:
-                query_max_mark = i_column_name
-            elif column in class_format:
-                query_class_format = i_column_name
+            if i_colname in course_synonym:
+                query_course.append(i_id)
+            elif i_colname in score_synonym:
+                query_score.append(i_id)
+            elif i_colname in credit_synonym:
+                query_credit.append(i_id)
+            elif i_colname in min_mark_synonym:
+                query_min_mark.append(i_id)
+            elif i_colname in max_mark_synonym:
+                query_max_mark.append(i_id)
+            elif i_colname in class_format_synonym:
+                query_class_format.append(i_id)
                 
 
         '''
-        use schema to extract row data
+        use column name to extract row data
         '''
         row_data = table_data["data"]
 
         output_data = []
-        for i_row_data in row_data:
 
+        for i_row_data in row_data:
             output_one = {}
 
             if query_course:
@@ -119,37 +111,27 @@ class SchoolTemplate():
                     combine_course = []
                     for i_query_course in query_course:
                         combine_course.append(i_row_data[i_query_course])
-                    output_one["Course"] = " ".join(combine_course)
+                    combine_course = "-".join(combine_course)
+
+                    output_one["Course"] = combine_course
                 else:
                     output_one["Course"] = i_row_data[query_course[0]]
-#             else:
-#                 output_one["Course"] = None
-                
+
 
             if query_score:
-                output_one["Score"] = i_row_data[query_score]
-#             else:
-#                 output_one["Score"] = None
-                
-            if query_credit:
-                output_one["Credit"] = i_row_data[query_credit]
-#             else:
-#                 output_one["Credit"] = None
-            
+                output_one["Score"] = i_row_data[query_score[0]]
 
-#             if query_grade_point:
-#                 output_one["Grade_Point"] = i_row_data[query_grade_point]
-#             else:
-#                 output_one["Grade_Point"] = None
+            if query_credit:
+                output_one["Credit"] = i_row_data[query_credit[0]]
 
             if query_min_mark:
-                output_one["Minimum Mark"] = i_row_data[query_min_mark]
-            
+                output_one["Minimum Mark"] = i_row_data[query_min_mark[0]]
+
             if query_max_mark:
-                output_one["Maximum Mark"] = i_row_data[query_max_mark]
-            
+                output_one["Maximum Mark"] = i_row_data[query_max_mark[0]]
+
             if query_class_format:
-                output_one["Class Format"] = i_row_data[query_class_format]
+                output_one["Class Format"] = i_row_data[query_class_format[0]]
 
             if output_one:
                 output_data.append(output_one)
@@ -163,54 +145,48 @@ class SchoolTemplate():
         '''
         prepare the candidate list
         ''' 
-        course = ["course title", "course titles", "course", "courses", 
-                  "module title", "subject name",
-                  "subject", "subject title", "subjects",
-                  "course name", "heads of passing"]
+        course_synonym = ["course title", "course titles", "course", "courses", 
+                          "module title", "subject name",
+                          "subject", "subject title", "subjects",
+                          "course name", "heads of passing"]
 
-        grade = ["grade", "grade obtained"]
+        grade_synonym = ["grade", "grade obtained"]
 
-        credit = ["credit", "unit attempted", "credits", 
-                  "units", "cr", "course credits", "credit(s)"]
-
-#         grade_point = ["grade point", "gradepoint", "spi",
-#                        "grade points", "gpa", "aggregate marks/cgpa", "grade pt(G)", "grade point (g)"]
+        credit_synonym = ["credit", "unit attempted", "credits", 
+                          "units", "cr", "course credits", "credit(s)"]
 
         
         '''
-        extract table data schema 
+        extract id and colname of table data
         '''
-        schema = table_data["columns"]
+        id_colname = []
+        for i_col_dict in table_data["columns"]:
+            id_colname.append((i_col_dict["id"] ,i_col_dict["label"]))
 
-        column_name = []
-        
-        for i_schema in schema:
-            column_name.append(i_schema["id"])
-
-        column_name.pop()
-        
         
         '''
         prepare the query
         '''
         query_course = []
-        query_grade = ""
-        query_credit = ""
-#         query_grade_point = ""
+        query_grade = []
+        query_credit = []
 
-        for i_column_name in column_name:
+
+        for i_id_colname in id_colname:
+            # extract the id
+            i_id = i_id_colname[0]
+            # extract the column name
+            i_colname = i_id_colname[1]
+
             # standardize format
-            column = i_column_name.lower()
+            i_colname = i_colname.lower()
 
-            if column in course:
-                query_course.append(i_column_name)
-            elif column in grade:
-                query_grade = (i_column_name)
-            elif column in credit:
-                query_credit = (i_column_name)
-#             elif column in grade_point:
-#                 query_grade_point = (i_column_name)
-
+            if i_colname in course_synonym:
+                query_course.append(i_id)
+            elif i_colname in grade_synonym:
+                query_grade.append(i_id)
+            elif i_colname in credit_synonym:
+                query_credit.append(i_id)
                 
 
         '''
@@ -221,38 +197,29 @@ class SchoolTemplate():
         output_data = []
 
         for i_row_data in row_data:
-
             output_one = {}
-            
+
             if query_course:
                 if len(query_course) > 1:
                     combine_course = []
                     for i_query_course in query_course:
                         combine_course.append(i_row_data[i_query_course])
-                    output_one["Course"] = " ".join(combine_course)
+                    combine_course = "-".join(combine_course)
+
+                    output_one["Course"] = combine_course
                 else:
                     output_one["Course"] = i_row_data[query_course[0]]
-#             else:
-#                 output_one["Course"] = None
-                
-            if query_grade:
-                output_one["Grade"] = i_row_data[query_grade]
-#             else: 
-#                 output_one["Grade"] = None
-                
-            if query_credit:
-                output_one["Credit"] = i_row_data[query_credit]
-#             else: 
-#                 output_one["Credit"] = None
 
-#             if query_grade_point:
-#                 output_one["Grade_Point"] = i_row_data[query_grade_point]
-#             else:
-#                 output_one["Grade_Point"] = None
+
+            if query_grade:
+                output_one["Grade"] = i_row_data[query_grade[0]]
+
+            if query_credit:
+                output_one["Credit"] = i_row_data[query_credit[0]]
 
             if output_one:
                 output_data.append(output_one)
-
+        
         return output_data
         
     
@@ -277,8 +244,8 @@ class SchoolTemplate():
         db = client["School_Template_db"]
         collection = db["School Template"]
         collection_df = pd.DataFrame(collection.find({}))
-        score_base_single_combo_list = collection_df["Score Based"][0]
-        grade_base_single_combo_list = collection_df["Grade Based"][0]
+        score_base_single_combo_list = collection_df["Score Base"][0]
+        grade_base_single_combo_list = collection_df["Grade Base"][0]
         
         
         school_data = 0

@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 import pymongo
 from .System_School_Template import SchoolTemplate
+from nltk import flatten
 
 
 
 
-class Reminder:
+class DataCheck:
     def __init__(self, school_name, table_data):
         self.school_name = school_name
         self.table_data = table_data
@@ -38,8 +39,8 @@ class Reminder:
             
             return "Score", outlier_idx
         
-        elif "Score" not in self.df.columns:
-            return "Score", []
+#         elif "Score" not in self.df.columns:
+#             return "Score", []
     
     
     def check_credit_range(self):
@@ -49,8 +50,8 @@ class Reminder:
             
             return "Credit", outlier_idx
         
-        elif "Credit" not in self.df.columns:
-            return "Credit", []
+#         elif "Credit" not in self.df.columns:
+#             return "Credit", []
         
     
     def check_grade_length(self):
@@ -60,28 +61,38 @@ class Reminder:
             
             return "Grade", outlier_idx
         
-        elif "Grade" not in self.df.columns:
-            return "Grade", []
+#         elif "Grade" not in self.df.columns:
+#             return "Grade", []
         
     
     def check_grade_existence(self):
-        unique_grade = self.df["Grade"].unique()
-        unique_grade = [i_grade.upper() for i_grade in unique_grade]
-        
-        # get the map dictionary from map_db
-        client = pymongo.MongoClient()
-        db = client["Map_db"]
-        collection = db[self.school_name]
-        collection_df = pd.DataFrame(collection.find({}))
-        
-        grade_map = {}
-        for i in range(len(collection_df)):
-            grade_map[collection_df["Grade"][i]] = collection_df["USgrade"][i]
+        if "Grade" in self.df.columns:
+            unique_grade = self.df["Grade"].unique()
+            unique_grade = [i_grade.upper() for i_grade in unique_grade]
+
+            # get the map dictionary from map_db
+            client = pymongo.MongoClient()
+            db = client["Map_db"]
+            collection = db[self.school_name]
+            collection_df = pd.DataFrame(collection.find({}))
+
+#             grade_map = {}
+#             for i in range(len(collection_df)):
+#                 grade_map[collection_df["Grade"][i]] = collection_df["USgrade"][i]
             
-        unknown_grade = []
-        for i_grade in unique_grade:
-            if i_grade not in grade_map.keys():
-                unknown_grade.append(i_grade)
+            grade = collection_df["Grade"].tolist()
+            unknown_grade = []
+            for i_grade in unique_grade:
+                if i_grade not in grade:
+                    unknown_grade.append(i_grade)
+            
+            outlier_list_ug = []
+            for i_unknow_grade in unknown_grade:
+                condition = self.df["Grade"] == i_unknow_grade
+                i_idx_ug = self.df[condition].index.tolist()
+                outlier_list_ug.append(i_idx_ug)
+                
+            flatten_outlier_list_ug = flatten(outlier_list_ug)
         
-        return "Grade", unknown_grade
+            return  "Grade", flatten_outlier_list_ug
         
