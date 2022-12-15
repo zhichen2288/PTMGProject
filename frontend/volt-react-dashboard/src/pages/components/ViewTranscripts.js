@@ -15,11 +15,11 @@ import axios from "../utils/http-axios";
 import { JsonToTable } from "react-json-to-table";
 //Ry
 import reducer from "../reducers/tableReducer";
+import StateContext from "../../context/stateContext";
 import Table from "./Tables";
 import { ActionTypes, makeData } from "../utils/studentTable";
 
 export default () => {
-  debugger
   let params = useParams();
 
   const [state, dispatch] = useReducer(reducer.reducer, reducer.initialState);
@@ -117,16 +117,17 @@ export default () => {
     dispatch({ type: ActionTypes.CALL_API });
     const fetchData = async () => {
       const response = await makeData(params["id"]);
-      if (response.data.length > 1) {
-        debugger
+      if (response.data.length > 0) {
         dispatch({ type: ActionTypes.SUCCESS, data: response.data });
       }
     };
     fetchData();
   }, []);
 
-  async function SaveTableData(e) {
-    debugger
+  async function saveTableData(e) {
+    debugger;
+    let result = window.confirm("Please make sure all changes are correct!");
+    if (!result) return;
     let data = [];
     let stateObject = [...state.data];
 
@@ -147,12 +148,34 @@ export default () => {
     );
   }
 
+  async function checkTableData(e) {
+    const response = await axios.get(
+      `/api/students/${params["id"]}/transcript?action=check_transcript_data`
+    );
+    if (response.status === 200) {
+      let data = response.data;
+      console.log("response data", JSON.parse(data.data));
+      // let data = {
+      //   0: {
+      //     message: ["score data type", "course data type"],
+      //     3: [1, 3, 2],
+      //     1: [0, 1, 2],
+      //   },
+      //   1: { message: ["score data type", "course data type"], 3: [5, 6] },
+      // };
+      dispatch({
+        type: ActionTypes.HIGHLIGHT_CELL,
+        data: JSON.parse(data.data),
+      });
+    }
+  }
+
   function tableUpdate(e, idx) {
     dispatch({ type: ActionTypes.UPDATE_TABLE_CONFIG, table_idx: idx });
   }
 
   return (
-    <>
+    <StateContext.Provider value={{ state, dispatch }}>
       <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
         <div className="mb-4 mb-lg-0">
           <Breadcrumb
@@ -166,15 +189,15 @@ export default () => {
             <Breadcrumb.Item active>Prepared Transcripts</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Prepared Transcripts</h4>
-          <p className="mb-0">
+          {/* <p className="mb-0">
             You are viewing the processed transcript of student [{studentName}].
-          </p>
+          </p> */}
         </div>
-        <div className="btn-toolbar mb-2 mb-md-0">
+        {/* <div className="btn-toolbar mb-2 mb-md-0">
           <Button variant="primary" size="sm">
             <FontAwesomeIcon icon={faPlus} className="me-2" /> Add New Student
           </Button>
-        </div>
+        </div> */}
       </div>
       <Accordion defaultActiveKey="0">
         {state.data &&
@@ -199,25 +222,12 @@ export default () => {
                     </Col>
                     {/* Ry*/}
                     <Col>
-                      {/* <BootstrapTable
-                      key={`$(table.page) "+" $(table.table_num)`}
-                      keyField="index"
-                      data={JSON.parse(table.table_data)["data"]}
-                      columns={newColumnNames}
-                      // cellEdit={cellEditFactory({
-                      //   mode: "click",
-                      //   blurToSave: true,
-                      // })}
-                    /> */}
                       {/* <JsonToTable
                       hover
                       className="user-table align-items-center"
                       json={table.table_data.data}
                     /> */}
-                      {/* 
-                    <Button type="submit" id="btn" onClick={onSaveData}>
-                      save
-                    </Button> */}
+
                       <Table
                         columns={table.table_data.columns}
                         data={table.table_data.data}
@@ -238,18 +248,25 @@ export default () => {
             );
           })}
       </Accordion>
-      <Row>
-        <Col>
-          <Link
-            to={{
-              pathname: `/ViewTableData/${params["id"]}`,
-            }}
-          >
-            <Button> View Table Data </Button>
-          </Link>
-          <Button onClick={(e) => SaveTableData(e)}>Save Table Data</Button>
-        </Col>
-      </Row>
-    </>
+      <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+        <Row xs="auto">
+          <Col>
+            <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
+          </Col>
+          <Col>
+            <Button onClick={(e) => saveTableData(e)}>Save Table Data</Button>
+          </Col>
+          <Col>
+            <Link
+              to={{
+                pathname: `/ViewTableData/${params["id"]}`,
+              }}
+            >
+              <Button> View Table Data </Button>
+            </Link>
+          </Col>
+        </Row>
+      </div>
+    </StateContext.Provider>
   );
 };

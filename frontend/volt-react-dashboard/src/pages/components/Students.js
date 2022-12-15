@@ -31,6 +31,7 @@ import {
 import axios from "../utils/http-axios";
 import uploadService from "../utils/fileUploadServices";
 import studentServices from "../utils/studentServices";
+import { de } from "faker/lib/locales";
 
 const leftButton = "<";
 const rightButton = ">";
@@ -46,6 +47,7 @@ export default () => {
   const [currentStudentId, setCurrentStudentId] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
+  const [currentRow, setCurrentRow] = useState("");
   // const [uploadProgress, setUploadProgress] = useState(0);
   // const [selectedFiles, setSelectedFiles] = useState(undefined);
   // const [progress, setProgress] = useState(0);
@@ -106,24 +108,28 @@ export default () => {
     changePage(1);
   }
 
-  const handleUploadTranscripts = (e) => {
+  const handleUploadTranscripts = (e, idx, studentId) => {
     setShowModal(true);
-    console.log(e.target.getAttribute("student-id"));
-    setCurrentStudentId(e.target.getAttribute("student-id"));
+    //console.log(e.target.getAttribute("student-id"));
+    setCurrentStudentId(studentId);
+    setCurrentRow(idx);
   }; // on click the upload button
 
-  const handlePrepareTranscripts = (idx, studentId) => {
+  const handlePrepareTranscripts = (student, idx, studentId) => {
+    if (!(student.status.localeCompare("NEW") == 0)) {
+      return alert("Please upload a new transcript");
+    }
     setLoadingText("Preparing...");
     setLoading(true);
     studentServices
       .sendToPrepare(studentId)
       .then((res) => {
-        console.log("result from the student services" + res);
         changeStudentStatus(idx, ["status"], ["PREPARED"]);
       })
       .catch(function (error) {
         // handle error
         console.log(error);
+        alert("Please upload a valid transcript!");
       })
       .then(() => {
         setLoading(false);
@@ -191,6 +197,7 @@ export default () => {
     setIsChecked(false);
     setPageNumber(1);
     setCurrentStudentId("");
+    setCurrentRow("");
     console.log("selected file flushed");
   };
   const handleSelectFile = (event) => {
@@ -211,6 +218,7 @@ export default () => {
         // always executed
       });
     handleClose();
+    changeStudentStatus(currentRow, ["status"], ["NEW"]);
     //TODO: set student status to processing
   };
   return (
@@ -227,7 +235,6 @@ export default () => {
             <Breadcrumb.Item active>Students List</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Students List</h4>
-          <p className="mb-0">The students sitting in our Database.</p>
         </div>
         <div className="btn-toolbar mb-2 mb-md-0">
           <Link
@@ -325,7 +332,7 @@ export default () => {
               <thead>
                 <tr>
                   <th className="border-bottom">Name</th>
-                  <th className="border-bottom">GPA</th>
+                  {/* <th className="border-bottom">GPA</th> */}
                   <th className="border-bottom">University</th>
                   <th className="border-bottom">Department</th>
                   <th className="border-bottom">Status</th>
@@ -344,53 +351,46 @@ export default () => {
                           </div>
                         </Card.Link>
                       </td>
-                      <td>{student["gpa"] != 0 ? student["gpa"] : "N/A"}</td>
+                      {/* <td>{student["gpa"] != 0 ? student["gpa"] : "N/A"}</td> */}
                       <td>{student.education.university}</td>
                       <td>{student.education.department}</td>
                       <td>{student.status}</td>
                       <td>
                         <ButtonGroup className="me-2" aria-label="Actions">
-                          <DropdownButton
-                            as={ButtonGroup}
-                            title="Transcripts"
-                            id="bg-nested-dropdown"
+                          <Button
+                            title="Upload"
+                            eventkey="1"
+                            onClick={(e) => {
+                              handleUploadTranscripts(e, idx, student.id);
+                            }}
+                            student-id={student.id}
                           >
-                            <Dropdown.Item
-                              eventKey="1"
-                              onClick={handleUploadTranscripts}
-                              student-id={student.id}
-                            >
-                              Upload
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                              onClick={() => {
-                                console.log(`/view-transcripts/${student.id}`);
-                                changeStudentStatus(idx, "ABC");
-                              }}
-                            >
-                              test
-                            </Dropdown.Item>
-                            <pre>{student.status.localeCompare("NEW")}</pre>
-                            {!(student.status.localeCompare("NEW") == 0) && (
-                              <Link
-                                className={"dropdown-item"}
-                                // disabled={student.status.localeCompare("PREPARED")}
-                                to={{
-                                  pathname: `/view-transcripts/${student.id}`,
-                                }}
-                              >
-                                View Prepared Transcripts
-                              </Link>
-                            )}
-                          </DropdownButton>
+                            Upload
+                          </Button>
+
+                          <Button
+                            title="Prepare"
+                            id="bg-nested-dropdown"
+                            student-id={student.id}
+                            onClick={() => {
+                              handlePrepareTranscripts(
+                                student,
+                                idx,
+                                student.id
+                              );
+                            }}
+                          >
+                            Process
+                          </Button>
+
                           <DropdownButton
                             as={ButtonGroup}
                             title="Edit"
                             id="bg-nested-dropdown"
                           >
-                            <Dropdown.Item student-id={student.id}>
+                            {/* <Dropdown.Item student-id={student.id}>
                               Update
-                            </Dropdown.Item>
+                            </Dropdown.Item> */}
                             <Dropdown.Item
                               onClick={() =>
                                 handleDeleteStudent(idx, student.id)
@@ -399,28 +399,26 @@ export default () => {
                               Remove
                             </Dropdown.Item>
                           </DropdownButton>
+
                           <DropdownButton
                             as={ButtonGroup}
-                            title="Process"
+                            title="Transcripts"
                             id="bg-nested-dropdown"
                           >
-                            <Dropdown.Item
-                              student-id={student.id}
-                              onClick={() => {
-                                handlePrepareTranscripts(idx, student.id);
-                              }}
-                            >
-                              Prepare
-                            </Dropdown.Item>
-                            {!(student.status.localeCompare("NEW") === 0) && (
-                              <Dropdown.Item
-                                student-id={student.id}
-                                onClick={() => {
-                                  handleCalculateGPA(idx, student.id);
+                            {!(student.status.localeCompare("NEW") == 0) ? (
+                              <Link
+                                className={"dropdown-item"}
+                                // disabled={
+                                //   student.status.localeCompare("NEW") === 0
+                                // }
+                                to={{
+                                  pathname: `/view-transcripts/${student.id}`,
                                 }}
                               >
-                                Calculate GPA
-                              </Dropdown.Item>
+                                View Prepared Transcripts
+                              </Link>
+                            ) : (
+                              <span> No transcripts found! </span>
                             )}
                           </DropdownButton>
                         </ButtonGroup>
@@ -511,22 +509,6 @@ export default () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <Button
-        onClick={(e) => {
-          setLoading(!loading);
-        }}
-      >
-        test loading
-      </Button>
-      <Button
-        onClick={(e) => {
-          changeStudentStatus(5, "gpa", 123);
-          changeStudentStatus(5, "status", "PREPARED");
-        }}
-      >
-        test change status
-      </Button>
     </>
   );
 };

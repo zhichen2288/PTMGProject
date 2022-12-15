@@ -1,11 +1,16 @@
+from cProfile import run
 import io
 import os
+from pdb import runcall
 from threading import Thread
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework_mongoengine.viewsets import ModelViewSet, GenericViewSet
+
+from .Run_Data_Check import run_data_check
+from .Run_School_Template import run_school_template
 
 from .handlers import ExtractTableHandler
 from .models import  ProcessedTable, StudentTable, University, Student, Department, Identifier, Transcript, Education
@@ -14,7 +19,7 @@ from .utils import extract_pages_from_raw_file, get_transcripts_and_dump_into_di
 from GC_beta.settings import BASE_DIR
 import json
 from bson.json_util import dumps
-from .run import run_class, run_gpa
+from .System_GPA import GPA
 
 
 
@@ -130,21 +135,27 @@ def student_transcript(request, pk):
         if not request.GET.get('action'):  # default behavior, get the transcript of a student
             serializer = TranscriptSerializer(transcript)
             return JsonResponse(serializer.data, status=200)
+
         elif request.GET.get('action') == 'calculate':  # get the transcript processing
             gpa = ExtractTableHandler.calculate_gpa(student)
             return JsonResponse({'gpa': gpa}, status=200)
+
         elif request.GET.get('action') == 'status':  # get the status of the transcript's process
             status = student.transcript.status
             return JsonResponse({'status': status}, status=200)
+
         elif request.GET.get('action') == 'prepare':
             student = None
             try:
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
+            if not len(student.transcript.valid_pages) > 0:
+                return JsonResponse({'error': "No uploaded file found."}, status=404)
             succeed = ExtractTableHandler.prepare_transcript(student)
             return JsonResponse({'message': "okay"}, status=200) if succeed else JsonResponse(
                 {'message': "something went wrong."}, status=200)
+
         elif request.GET.get('action') == 'view':
             student = None
             try:
@@ -154,20 +165,33 @@ def student_transcript(request, pk):
             processed_transcripts = student.transcript.processed_data
             tables_in_dict = [json.loads(x.to_json()) for x in processed_transcripts]
             return JsonResponse({'student_name': student.name, 'tables': tables_in_dict})
+
+        elif request.GET.get('action') == 'check_transcript_data':
+            student = None
+            try:
+                student = Student.objects.get(id=pk)
+            except:
+                return JsonResponse({'error': "student not found."}, status=404)
+            processed_data = run_data_check(student.id)
+            print(processed_data)
+            return JsonResponse({'student_name': student.name, 'data':str(processed_data)})
+
         elif request.GET.get('action') == 'viewtables':
             student = None
             try:
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
-        
-            df, consolidatedData = run_class(pk)
-            student.consolidatedData = json.dumps(consolidatedData['data']) 
+            
+            df = run_school_template(student.id)
+            #student.consolidatedData = json.dumps(consolidatedData['data']) 
+            student.consolidatedData = df.to_json(orient = 'records')
             student.save()
             #processed_transcripts = StudentTable.objects.all()
             processed_transcripts = student.consolidatedData
             #tables_in_dict = [json.loads(x.to_json()) for x in processed_transcripts]
             return JsonResponse({'student_name': student.name, 'tables': processed_transcripts})
+
         elif request.GET.get('action') == 'calculateGPA':
             student = None
             try:
@@ -175,9 +199,9 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
         
-            df, consolidatedData = run_class(pk)
-            result = run_gpa(student.education.university, df)
-            return JsonResponse({'student_name': student.name, 'result': result})
+            df = run_school_template(student.id)
+            result = GPA(student.education.university, df)
+            return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
 
     elif request.method == 'POST':  # add new transcripts, default is override
         pages = list(map(int, request.POST['validPages'].split(',')))
@@ -192,6 +216,7 @@ def student_transcript(request, pk):
             return JsonResponse({}, status=404)
         student.transcript.raw_file.replace(buffer)
         student.transcript.valid_pages = pages
+        student.status = "NEW"
         student.save()
         #  --------------------------------
         get_transcripts_and_dump_into_disk(student, BASE_DIR)

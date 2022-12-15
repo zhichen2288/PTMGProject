@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
 import pymongo
+<<<<<<< HEAD
 import System_School_Template
+=======
+from .System_School_Template import SchoolTemplate
+>>>>>>> shreyas
 from nltk import flatten
 
 
@@ -12,7 +16,11 @@ class DataCheck:
         self.school_name = school_name
         self.table_data = table_data
         # initialize school object
+<<<<<<< HEAD
         self.school_obj = System_School_Template.SchoolTemplate(self.school_name, self.table_data)
+=======
+        self.school_obj = SchoolTemplate(self.school_name, self.table_data)
+>>>>>>> shreyas
         self.df = self.school_obj.apply_school_template()
         
         

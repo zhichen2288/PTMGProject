@@ -13,6 +13,7 @@ const initialState = {
   data: "",
   skipReset: false,
   table_idx: 0,
+  highlightCellData: "",
 };
 
 function reducer(state, action) {
@@ -117,6 +118,23 @@ function reducer(state, action) {
         columns: { $splice: [[deleteIndex, 1]] },
       });
 
+    case ActionTypes.DELETE_ROW:
+      return produce(state, (draft) => {
+        delete draft.data[state.table_idx].table_data.data.splice(
+          action.rowIndex,
+          1
+        );
+        draft.data[state.table_idx].table_data.data.forEach((element, i) => {
+          element["0"] = i + 1;
+        });
+        draft.highlightCellData = "";
+      });
+
+    case ActionTypes.HIGHLIGHT_CELL:
+      return produce(state, (draft) => {
+        draft.highlightCellData = action.data;
+      });
+
     case ActionTypes.ENABLE_RESET:
       return update(state, { skipReset: { $set: true } });
 
@@ -126,7 +144,6 @@ function reducer(state, action) {
       };
 
     case ActionTypes.SUCCESS:
-      debugger;
       return {
         ...state,
         data: action.data,

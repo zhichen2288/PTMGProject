@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { usePopper } from "react-popper";
 import { ActionTypes, DataTypes, shortId } from "../../utils/studentTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faPlusSquare } from "@fortawesome/free-solid-svg-icons";
 import TextIcon from "../../../assets/img/Text";
 import MultiIcon from "../../../assets/img/Multi";
 import HashIcon from "../../../assets/img/Hash";
@@ -167,7 +167,7 @@ export default function Header({
     });
   }
   function getHeader() {
-    if (id !== 999999) {
+    if (id !== "999999") {
       return (
         <>
           <div {...getHeaderProps()} className="th noselect d-inline-block">
@@ -296,7 +296,7 @@ export default function Header({
             })
           }
         >
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon icon={faPlusSquare} style={{ color: "green" }} />
         </div>
       </div>
     );
