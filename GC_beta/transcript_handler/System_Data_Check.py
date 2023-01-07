@@ -68,7 +68,7 @@ class DataCheck:
     def check_grade_existence(self):
         if "Grade" in self.df.columns:
             unique_grade = self.df["Grade"].unique()
-            unique_grade = [i_grade.upper() for i_grade in unique_grade]
+            unique_grade = [i_grade for i_grade in unique_grade]
 
             # get the map dictionary from map_db
             client = pymongo.MongoClient()
@@ -79,20 +79,22 @@ class DataCheck:
 #             grade_map = {}
 #             for i in range(len(collection_df)):
 #                 grade_map[collection_df["Grade"][i]] = collection_df["USgrade"][i]
-            
-            grade = collection_df["Grade"].tolist()
-            unknown_grade = []
-            for i_grade in unique_grade:
-                if i_grade not in grade:
-                    unknown_grade.append(i_grade)
-            
-            outlier_list_ug = []
-            for i_unknow_grade in unknown_grade:
-                condition = self.df["Grade"] == i_unknow_grade
-                i_idx_ug = self.df[condition].index.tolist()
-                outlier_list_ug.append(i_idx_ug)
+
+            # deal with the situation when the school name is inside the database
+            if len(collection_df) != 0:
+                grade = collection_df["Grade"].tolist()
+                unknown_grade = []
+                for i_grade in unique_grade:
+                    if i_grade.upper() not in grade:
+                        unknown_grade.append(i_grade)
                 
-            flatten_outlier_list_ug = flatten(outlier_list_ug)
-        
-            return  "Grade", flatten_outlier_list_ug
+                outlier_list_ug = []
+                for i_unknow_grade in unknown_grade:
+                    condition = self.df["Grade"] == i_unknow_grade
+                    i_idx_ug = self.df[condition].index.tolist()
+                    outlier_list_ug.append(i_idx_ug)
+                    
+                flatten_outlier_list_ug = flatten(outlier_list_ug)
+            
+                return  "Grade", flatten_outlier_list_ug
         

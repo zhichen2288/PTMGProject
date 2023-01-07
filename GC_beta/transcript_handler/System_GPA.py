@@ -11,71 +11,85 @@ class GPA():
         self.df = df
         
         
-    def score_2_letter(self, score):
+    # def score_2_letter(self, score):
+    #     '''
+    #     define a function to map percentage score to letter
+    #     '''
+    
+    #     # use two sides restriction to exclude the outlier
+    #     if (score >= 93) and (score <= 100):
+    #         letter = "A"
+    #     elif (score >= 90) and (score < 93): 
+    #         letter = "A-"
+    #     elif (score >= 87) and (score < 90):
+    #         letter = "B+"
+    #     elif (score >= 83) and (score < 87):
+    #         letter = "B"
+    #     elif (score >= 80) and (score < 83):
+    #         letter = "B-"
+    #     elif (score >= 77) and (score < 80):
+    #         letter = "C+"
+    #     elif (score >= 73) and (score < 77):
+    #         letter = "C"
+    #     elif (score >= 70) and (score < 73):
+    #         letter = "C-"
+    #     elif (score >= 67) and (score < 70):
+    #         letter = "D+"
+    #     elif (score >= 65) and (score < 67):
+    #         letter = "D"
+    #     elif (score < 65) and (score > 0):
+    #         letter = "F"
+        
+    #     else:
+    #         letter = None
+    
+    #     return letter
+
+    def score_2_USgrade(self, score):
         '''
         define a function to map percentage score to letter
         '''
-    
-        # use two sides restriction to exclude the outlier
-        if (score >= 93) and (score <= 100):
-            letter = "A"
-        elif (score >= 90) and (score < 93): 
-            letter = "A-"
-        elif (score >= 87) and (score < 90):
-            letter = "B+"
-        elif (score >= 83) and (score < 87):
-            letter = "B"
-        elif (score >= 80) and (score < 83):
-            letter = "B-"
-        elif (score >= 77) and (score < 80):
-            letter = "C+"
-        elif (score >= 73) and (score < 77):
-            letter = "C"
-        elif (score >= 70) and (score < 73):
-            letter = "C-"
-        elif (score >= 67) and (score < 70):
-            letter = "D+"
-        elif (score >= 65) and (score < 67):
-            letter = "D"
-        elif (score < 65) and (score > 0):
-            letter = "F"
+        client = pymongo.MongoClient()
+        db = client["Map_db"]
+        collection = db[self.school_name]
+        collection_df = pd.DataFrame(collection.find({}))
         
-        else:
-            letter = None
-    
-        return letter
+        # deal with the situation when school name is inside the database
+        if len(collection_df) != 0:
+            def convert_s(score):
+                for i in range(len(collection_df)):
+                    left_end_point = collection_df.loc[i, "From"]
+                    right_end_point = collection_df.loc[i, "To"]
+                    
+                    if (score >= left_end_point) & (score < right_end_point):
+                        USgrade = collection_df.loc[i, "USgrade"]
+                        return USgrade
+            
+            self.df["USgrade"] = self.df["Score"].apply(convert_s)
+            
+            return self.df
+        
+        
+        # deal with the situation when school name is not inside the database
+        collection = db["General_Score"]
+        collection_df = pd.DataFrame(collection.find({}))
+        
+        if len(collection_df) != 0:
+            def convert_g(score):
+                for i in range(len(collection_df)):
+                    left_end_point = collection_df.loc[i, "From"]
+                    right_end_point = collection_df.loc[i, "To"]
+                    
+                    if (score >= left_end_point) & (score < right_end_point):
+                        USgrade = collection_df.loc[i, "USgrade"]
+                        return USgrade
+            
+            self.df["USgrade"] = self.df["Score"].apply(convert_g)
+            
+            return self.df
 
     
-    
-    def letter_2_GP(self, letter):
-        '''
-        define a function to map letter grade to GP
-        '''
-    
-        # define a dictionary to map letter grade to GP
-        map_letter_2_GP = {
-
-        "A+": 4.0, "a+": 4.0,
-        "A": 4.0, "a": 4.0,
-        "A-": 3.7, "a-": 3.7,
-        "B+": 3.3, "b+": 3.3,
-        "B": 3.0, "b": 3.0,
-        "B-": 2.7, "b-": 2.7,
-        "C+": 2.3, "c+": 2.3,
-        "C": 2.0, "c": 2.0,
-        "C-": 1.7, "c-": 1.7,
-        "D+": 1.3, "d+": 1.3, 
-        "D": 1.0, "d": 1.0,
-        "F": 0.0, "f": 0.0
-
-        }
-    
-        GP = map_letter_2_GP[letter]
-    
-        return GP
-    
-    
-    def grade_2_usgrade(self, grade):
+    def grade_2_USgrade(self, grade):
         client = pymongo.MongoClient()
         db = client["Map_db"]
         collection = db[self.school_name]
@@ -99,7 +113,7 @@ class GPA():
             return self.df
 
         
-        collection = db["General"]
+        collection = db["General_Grade"]
         collection_df = pd.DataFrame(collection.find({}))
         
         if len(collection_df) != 0:
@@ -118,15 +132,46 @@ class GPA():
             self.df["USgrade"] = self.df["Grade"].apply(convert_g)
             
             return self.df
+
+
+    def USgrade_2_GP(self, USgrade):
+        '''
+        define a function to map letter grade to GP
+        '''
+    
+        # define a dictionary to map letter grade to GP
+        map_USgrade_2_GP = {
+
+        "A": 4.00, "a": 4.00,
+        "A-": 3.67, "a-": 3.67,
+        "B+": 3.33, "b+": 3.33,
+        "B": 3.00, "b": 3.00,
+        "B-": 2.67, "b-": 2.67,
+        "C+": 2.33, "c+": 2.33,
+        "C": 2.00, "c": 2.00,
+        "C-": 1.67, "c-": 1.67,
+        "D+": 1.33, "d+": 1.33,
+        "D": 1.00, "d": 1.00,
+        "F": 0.00, "f": 0.00
+
+        }
+    
+        GP = map_USgrade_2_GP[USgrade]
+    
+        return GP
         
     
     def score_base_calculate_GPA(self):
-        self.df["letter"] = self.df["Score"].apply(self.score_2_letter)
+        self.df["Score"].apply(self.score_2_USgrade)
         self.df = self.df.dropna()
-        gp = self.df["letter"].apply(self.letter_2_GP)
-        sum_gp = (gp * self.df["Credit"]).sum()
-        sum_credit = self.df["Credit"].sum()
-        GPA = sum_gp/sum_credit
+        gp = self.df["USgrade"].apply(self.USgrade_2_GP)
+        if "Credit" in self.df.columns:
+            sum_gp = (gp * self.df["Credit"]).sum()
+            sum_credit = self.df["Credit"].sum()
+            GPA = sum_gp/sum_credit
+        elif "Credit" not in self.df.columns:
+            sum_gp = gp.sum()
+            GPA = sum_gp/len(gp)
 
         return GPA
     
@@ -153,13 +198,16 @@ class GPA():
 
 
     def grade_base_calculate_GPA(self):
-        self.df["Grade"].apply(self.grade_2_usgrade)
+        self.df["Grade"].apply(self.grade_2_USgrade)
         self.df = self.df.dropna()
-        gp = self.df["USgrade"].apply(self.letter_2_GP)
-        sum_gp = (gp * self.df["Credit"]).sum()
-        sum_credit = self.df["Credit"].sum()
-
-        GPA = sum_gp/sum_credit
+        gp = self.df["USgrade"].apply(self.USgrade_2_GP)
+        if "Credit" in self.df.columns:
+            sum_gp = (gp * self.df["Credit"]).sum()
+            sum_credit = self.df["Credit"].sum()
+            GPA = sum_gp/sum_credit
+        elif "Credit" not in self.df.columns:
+            sum_gp = gp.sum()
+            GPA = sum_gp/len(gp)
 
         return GPA
     
