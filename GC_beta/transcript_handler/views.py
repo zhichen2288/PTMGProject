@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework_mongoengine.viewsets import ModelViewSet, GenericViewSet
+from django.core.files.storage import default_storage
 
 from .Run_Data_Check import run_data_check
 from .Run_School_Template import run_school_template
@@ -204,18 +205,36 @@ def student_transcript(request, pk):
             return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
 
     elif request.method == 'POST':  # add new transcripts, default is override
-        pages = list(map(int, request.POST['validPages'].split(',')))
         studentId = pk
-        pdfFileObj = request.FILES['file'].read()
-        buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
-        print(request.POST['validPages'], pages, studentId)
         try:
             student = Student.objects.get(id=studentId)
         except:
             print(f'student {studentId} not found.')
             return JsonResponse({}, status=404)
-        student.transcript.raw_file.replace(buffer)
-        student.transcript.valid_pages = pages
+
+        images = request.FILES.getlist('snippedImages')
+        filenames = []
+        if(len(images) > 0):
+            new_processed_tables = []
+            for image in images:
+                filename = default_storage.save(f'{student.name}/{image.name}', image)
+                file_url = default_storage.url(filename)
+                substrings = image.name.split('-t')
+                pageNumber = substrings[0][1]  # Extract the character after the 'p'
+                tableNumber = substrings[1].split('.')[0]
+                new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data="",
+                                                    image_path=file_url)
+                new_processed_tables.append(new_processed_table)
+                filenames.append(filename)
+        else:
+            pages = list(map(int, request.POST['validPages'].split(',')))
+            pdfFileObj = request.FILES['file'].read()
+            buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
+            print(request.POST['validPages'], pages, studentId)        
+        
+        #student.transcript.raw_file.replace(buffer)
+        student.transcript.processed_data = new_processed_tables
+        # #student.transcript.valid_pages = pages
         student.status = "NEW"
         student.save()
         #  --------------------------------

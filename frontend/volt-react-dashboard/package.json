@@ -1,27 +1,12 @@
 {
-  "name": "@themesberg/volt-react-dashboard",
-  "description": "Volt React Dashboard is a free and open source admin dashboard template powered by React.js and Bootstrap 5",
-  "author": "Themesberg",
-  "keywords": [
-    "bootstrap 5",
-    "react",
-    "react dashboard",
-    "react admin template",
-    "free react",
-    "react ui library",
-    "react bootstrap 5",
-    "bootstrap 5 dashboard",
-    "themesberg"
-  ],
+  "name": "ptmg",
+  "description": "PTMG project",
+  "author": "",
   "proxy": "http://localhost:8000",
   "license": "MIT",
-  "homepage": "https://demo.themesberg.com/volt-react-dashboard",
-  "bugs": {
-    "url": "https://github.com/themesberg/volt-react-dashboard/issues"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/themesberg/volt-react-dashboard"
+    "url": "https://github.com/zhichen2288/PTMGProject.git"
   },
   "version": "1.0.0",
   "dependencies": {
@@ -44,19 +29,22 @@
     "immutability-helper": "^3.1.1",
     "moment-timezone": "^0.5.31",
     "node-sass": "^4.14.1",
+    "pdfjs-dist": "^2.15.349",
     "react": "^16.13.1",
     "react-bootstrap-table-next": "^4.0.3",
     "react-bootstrap-table2-editor": "^1.4.0",
     "react-chartist": "^0.14.3",
     "react-contenteditable": "^3.3.6",
     "react-copy-to-clipboard": "^5.0.3",
+    "react-cropper": "^2.1.8",
     "react-datetime": "^3.0.4",
     "react-dom": "^16.13.1",
     "react-github-btn": "^1.2.0",
+    "react-image-crop": "^10.0.9",
     "react-json-to-table": "^0.1.7",
     "react-live": "^2.2.3",
     "react-loading-overlay": "^1.0.1",
-    "react-pdf": "^5.5.0",
+    "react-pdf": "^5.7.2",
     "react-popper": "^2.3.0",
     "react-router-dom": "^5.2.0",
     "react-router-hash-link": "^2.3.1",

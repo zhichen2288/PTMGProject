@@ -379,3 +379,6 @@ html {
 .invalidCell-true {
   background-color: red;
 }
+.ReactCrop {
+  overflow-x: scroll !important;
+}
