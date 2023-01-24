@@ -153,8 +153,7 @@ def student_transcript(request, pk):
                 return JsonResponse({'error': "student not found."}, status=404)
             if not len(student.transcript.valid_pages) > 0:
                 return JsonResponse({'error': "No uploaded file found."}, status=404)
-            #succeed = ExtractTableHandler.prepare_transcript(student)
-            succeed = ExtractTableHandler.get_extractTable_data(student)
+            succeed = ExtractTableHandler.prepare_transcript(student)
             return JsonResponse({'message': "okay"}, status=200) if succeed else JsonResponse(
                 {'message': "something went wrong."}, status=200)
 
@@ -214,7 +213,7 @@ def student_transcript(request, pk):
             return JsonResponse({}, status=404)
 
         images = request.FILES.getlist('snippedImages')
-        page_numbers = []
+        filenames = []
         if(len(images) > 0):
             new_processed_tables = []
             for image in images:
@@ -226,7 +225,7 @@ def student_transcript(request, pk):
                 new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data="",
                                                     image_path=file_url)
                 new_processed_tables.append(new_processed_table)
-                page_numbers.append(pageNumber)
+                filenames.append(filename)
         else:
             pages = list(map(int, request.POST['validPages'].split(',')))
             pdfFileObj = request.FILES['file'].read()
@@ -236,7 +235,6 @@ def student_transcript(request, pk):
         #student.transcript.raw_file.replace(buffer)
         student.transcript.processed_data = new_processed_tables
         # #student.transcript.valid_pages = pages
-        student.transcript.valid_pages = list(map(int, page_numbers))
         student.status = "NEW"
         student.save()
         #  --------------------------------

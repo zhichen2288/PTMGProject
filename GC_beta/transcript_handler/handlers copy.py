@@ -11,8 +11,6 @@ import re
 import numpy as np
 from pathlib import Path
 from urllib.parse import urljoin
-from django.core.files.storage import default_storage
-
 
 
 
@@ -49,20 +47,6 @@ class ExtractTableHandler(GenericTranscriptHandler):
         student.transcript.processed_data = new_processed_tables
         student.save()
         return True
-
-    def get_extractTable_data(self, student, force_new=False):
-        paths = self._compose_paths(student)
-        os_path = default_storage.location
-        table_data = student.transcript.processed_data
-        for i in range(len(table_data)):
-            abs_path = os_path.split('\\media')[0]
-            db_img_path = os.path.normpath(table_data[i].image_path)
-            table_data = self.et_sess.process_file(filepath=f'{abs_path}{db_img_path}', output_format="df")
-            server_response = self.et_sess.ServerResponse.json()
-            #self._dump_response(paths['output_dir'], table_data)
-
-        return True
-
 
     def calculate_gpa(self, student):
         student_university = student.education.university

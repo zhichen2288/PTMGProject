@@ -110,6 +110,7 @@ export default function App({ pageNumber, onIncrement }) {
 
   function handleImageSelect() {
     if (completedCrop) {
+      debugger;
       const imageSrc = previewCanvasRef.current.toDataURL();
       const updatedCount = onIncrement();
       setIndexImageCount(indexImageCount + 1);
@@ -139,7 +140,7 @@ export default function App({ pageNumber, onIncrement }) {
   return (
     <Container fluid>
       <Row>
-        <Col md={5}>
+        <Col md={8}>
           {/* <div className="Crop-Controls">
         <input type="file" accept="image/*" onChange={onSelectFile} />
       </div> */}
@@ -148,7 +149,6 @@ export default function App({ pageNumber, onIncrement }) {
             crop={crop}
             onChange={(_, percentCrop) => setCrop(percentCrop)}
             onComplete={(c) => setCompletedCrop(c)}
-            style={{ width: "1200px" }}
           >
             {/* <img
               ref={imgRef}
@@ -169,12 +169,10 @@ export default function App({ pageNumber, onIncrement }) {
               //   alignItems: "center",
               // }}
               onLoadSuccess={loadComplete}
-              width={1200}
+              width={1000}
             />
           </ReactCrop>
           {/* )} */}
-        </Col>
-        <Col md={4}>
           <div>
             {!!completedCrop && (
               <>
@@ -186,9 +184,10 @@ export default function App({ pageNumber, onIncrement }) {
                     objectFit: "contain",
                     width: completedCrop.width,
                     height: completedCrop.height,
+                    display: "none",
                   }}
                 />
-                <Button variant="primary" size="sm" onClick={handleImageSelect}>
+                <Button variant="primary" size="lg" onClick={handleImageSelect}>
                   Add Image
                 </Button>
               </>
