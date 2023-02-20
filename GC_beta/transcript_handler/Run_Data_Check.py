@@ -67,9 +67,9 @@ def get_page_data(sid):
 def run_data_check(sid):
     def find_id(table_data):
         score_synonym = ["score", "mark", "scores", "marks obtained", 
-                         "obt", "marks obtained", "record", "scroe"]
+                         "obt", "marks obtained", "record", "scroe", "marks"]
 
-        credit_synonym = ["credit", "unit attempted", "credits", 
+        credit_synonym = ["credit", "unit attempted", "credits", "credit(s)", 
                           "units", "cr", "course credits"]
 
         grade_synonym = ["grade", "grade obtained"]
@@ -179,7 +179,7 @@ def run_data_check(sid):
                 i_column_mol = i_column + 7*(j+1)
                 outlier_list[i_column_mol] = table_outlier[j][2]
 
-        total_outlier_list[i] = outlier_list
+            total_outlier_list[i] = outlier_list
 
     total_outlier_list = json.dumps(total_outlier_list)
         

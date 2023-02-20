@@ -42,7 +42,7 @@ class SchoolTemplate:
                           "course name", "heads of passing"]
 
         score_synonym = ["score", "mark", "scores", "marks obtained", 
-                         "obt", "marks obtained", "record", "scroe"]
+                         "obt", "marks obtained", "record", "scroe", "marks"]
 
         credit_synonym = ["credit", "unit attempted", "credits", 
                           "units", "cr", "course credits"]
@@ -248,7 +248,7 @@ class SchoolTemplate:
         grade_base_single_combo_list = collection_df["Grade Base"][0]
         
         
-        school_data = 0
+        school_data = []
         if self.school_name in score_base_single_combo_list :
             school_data = self.use_score_base_single_combo(self.table_data)
             
@@ -262,10 +262,12 @@ class SchoolTemplate:
             school_data_try_2 = self.use_grade_base_single_combo(self.table_data)
             # * school_data_try_1 is a list of a bunch of dictionary
             
-            if "Score" in school_data_try_1[0].keys():
-                school_data = school_data_try_1
-            elif "Grade" in school_data_try_1[0].keys():
-                schoo_data= school_data_try_2
+            if school_data_try_1:
+                if "Score" in school_data_try_1[0].keys():
+                    school_data = school_data_try_1
+            if school_data_try_2:
+                if "Grade" in school_data_try_2[0].keys():
+                    school_data = school_data_try_2
             
         
         '''
@@ -285,9 +287,9 @@ class SchoolTemplate:
 #             df = df.dropna(subset=['Score'])
             # * subset: drop rows with Nan value in specific columns
             
-        if "Grade" in df.columns:
-            df = df.replace("", np.nan)
-            df = df.dropna(subset=['Grade'])
+        # if "Grade" in df.columns:
+        #     df = df.replace("", np.nan)
+        #     df = df.dropna(subset=['Grade'])
             
         if "Credit" in df.columns:
             df["Credit"] = pd.to_numeric(df['Credit'], errors = "coerce")
