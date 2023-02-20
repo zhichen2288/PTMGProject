@@ -135,6 +135,7 @@ export default () => {
               table.image_path.lastIndexOf("\\") + 1
             );
             pdfImagePath = pdfImagePath + `${studentName}-raw-transcripts.pdf`;
+            let serverUrl = "http://localhost:8000/" + table.image_path;
             return (
               <Accordion.Item eventKey={idx} key={"table-" + idx}>
                 <Accordion.Header onClick={(e) => tableUpdate(e, idx)}>
@@ -143,13 +144,13 @@ export default () => {
                 <Accordion.Body>
                   <Row>
                     <Col>
-                      {/* <Image src={table.image_path} /> */}
-                      <Document
+                      <Image src={serverUrl} />
+                      {/* <Document
                         file={pdfImagePath}
                         onLoadSuccess={onDocumentLoadSuccess}
                       >
                         <Page pageNumber={pageNumber} />
-                      </Document>
+                      </Document> */}
                     </Col>
                     {/* Ry*/}
                     <Col>

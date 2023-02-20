@@ -16,6 +16,7 @@ import {
   Container,
   Card,
   CardGroup,
+  Alert,
 } from "@themesberg/react-bootstrap";
 import StateContext from "../../../context/stateContext";
 import { ActionTypes } from "../../utils/studentTable";
@@ -75,7 +76,10 @@ export default function Scroller() {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <img src={context.state.images[indexImageCount].imageSrc} />
+            <img
+              style={{ border: "1px solid black" }}
+              src={context.state.images[indexImageCount].imageSrc}
+            />
           </Modal.Body>
         </Modal>
       </div>
@@ -85,8 +89,16 @@ export default function Scroller() {
   return (
     <Container
       className="scroller"
-      style={{ height: "700px", overflowY: "scroll" }}
+      style={{ height: "700px", overflowY: "scroll", border: "1px solid #ddd" }}
     >
+      <Alert variant="primary">
+        <Alert.Heading>Images Container</Alert.Heading>
+        <p>
+          Select the portion of image by dragging mouse and click{" "}
+          <b>Add Image</b> button to save for upload.
+        </p>
+      </Alert>
+
       <CardGroup>
         {context.state &&
           context.state.images.map((image, index) => {

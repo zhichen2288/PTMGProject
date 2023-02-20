@@ -157,7 +157,7 @@ def student_transcript(request, pk):
             succeed = ExtractTableHandler.get_extractTable_data(student)
             return JsonResponse({'message': "okay"}, status=200) if succeed else JsonResponse(
                 {'message': "something went wrong."}, status=200)
-
+ 
         elif request.GET.get('action') == 'view':
             student = None
             try:

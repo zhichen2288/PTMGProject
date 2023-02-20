@@ -54,15 +54,57 @@ class ExtractTableHandler(GenericTranscriptHandler):
         paths = self._compose_paths(student)
         os_path = default_storage.location
         table_data = student.transcript.processed_data
+        json_tables = []
         for i in range(len(table_data)):
             abs_path = os_path.split('\\media')[0]
             db_img_path = os.path.normpath(table_data[i].image_path)
-            table_data = self.et_sess.process_file(filepath=f'{abs_path}{db_img_path}', output_format="df")
-            server_response = self.et_sess.ServerResponse.json()
-            #self._dump_response(paths['output_dir'], table_data)
+            extracted_output = self.et_sess.process_file(filepath=f'{abs_path}{db_img_path}', output_format="df")
+            image_name = table_data[i].image_path.split('/')[-1].split('.')[0]
+            self.save_response_CSV_JSON(paths['output_dir'], extracted_output, image_name)
+            json_table = self.get_json_data(extracted_output)
+            json_tables.append(json_table)
 
+        self.save_response_db(json_tables, student, len(table_data))
         return True
 
+    def get_json_data(self, tables):
+        tables_number = len(tables)
+        #tables_in_json = []
+        for i in range(tables_number):
+            table = tables[i]   
+            try:
+                table.columns = table.iloc[0]
+            except:
+                pass
+            table = table.iloc[1:, :].fillna('')
+            json_string = table.to_json(orient="table")
+            #tables_in_json.append(json_string)
+        return json_string
+
+    def save_response_db(self, json_tables, student, tables_number):
+        for i in range(tables_number):
+            student.transcript.processed_data[i].table_data = json_tables[i]
+            
+        student.status = "PREPARED"
+        student.save()
+        return True
+
+
+    def save_response_CSV_JSON(self, output_dir, table_data, image_name):
+        try:
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir)
+            tables_number = len(self.et_sess.ServerResponse.json()['Tables'])
+            for i in range(tables_number):
+                table_data[i].to_csv(os.path.join(output_dir, f'table-{image_name}.csv'), index=False)
+                data_folder = Path(output_dir)
+                file_to_open = data_folder / "server_response.json"
+                f = open(file_to_open, 'w', encoding='utf-8')
+                json.dump(self.et_sess.ServerResponse.json(), f, ensure_ascii=False, indent=4)
+            
+            return True
+        except: 
+            return False
 
     def calculate_gpa(self, student):
         student_university = student.education.university

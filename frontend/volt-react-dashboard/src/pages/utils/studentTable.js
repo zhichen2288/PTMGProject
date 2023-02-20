@@ -117,6 +117,7 @@ export function shortId() {
 }
 
 export const ActionTypes = Object.freeze({
+  CLEAR_IMAGE_DATA: "clear_image_data",
   DELETE_IMAGE_DATA: "delete_image_data",
   SAVE_IMAGE_DATA: "save_image_data",
   UPDATE_TABLE_CONFIG: "update_table_config",

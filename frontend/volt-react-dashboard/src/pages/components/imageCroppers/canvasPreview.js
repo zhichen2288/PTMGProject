@@ -14,8 +14,9 @@ export async function canvasPreview(
   if (!ctx) {
     throw new Error("No 2d context");
   }
-  const scaleX = image.naturalWidth / (image.width - 100);
-  const scaleY = image.naturalHeight / (image.height - 100);
+  debugger;
+  const scaleX = image.naturalWidth / image.width;
+  const scaleY = image.naturalHeight / image.height;
   // devicePixelRatio slightly increases sharpness on retina devices
   // at the expense of slightly slower render times and needing to
   // size the image back down if you want to download/upload and be

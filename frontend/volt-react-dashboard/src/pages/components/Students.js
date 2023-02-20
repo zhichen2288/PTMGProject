@@ -35,6 +35,8 @@ import {
 import axios from "../utils/http-axios";
 import uploadService from "../utils/fileUploadServices";
 import studentServices from "../utils/studentServices";
+import { ActionTypes } from "../utils/studentTable";
+
 import ImageCrop from "./imageCroppers/ImageCrop";
 import StateContext from "../../context/stateContext";
 
@@ -189,9 +191,18 @@ export default () => {
     setCurrentStudentId("");
     setCurrentRow("");
     SetCanvasImage("");
+    clearImageData();
   };
+
   const handleSelectFile = (event) => {
-    setCurrentFile(event.target.files[0]); //
+    clearImageData();
+    setCurrentFile(event.target.files[0]);
+  };
+
+  const clearImageData = () => {
+    context.dispatch({
+      type: ActionTypes.CLEAR_IMAGE_DATA,
+    });
   };
 
   function deepCopy(arr) {
@@ -199,9 +210,13 @@ export default () => {
   }
 
   const handleUpload = () => {
+    debugger;
     let snippedImages = [];
     if (context.state.images.length >= 1) {
       snippedImages = deepCopy(context.state.images);
+    } else {
+      alert("No image to upload!");
+      return;
     }
 
     uploadService

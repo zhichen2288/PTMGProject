@@ -145,7 +145,7 @@ function reducer(state, action) {
         data: action.data,
       };
 
-    case ActionTypes.SAVE_IMAGE_DATA:
+    case ActionTypes.SAVE_IMAGE_DATA: //imageCroppers/imageCrop.js
       console.log("reducer state ", state);
       return produce(state, (draft) => {
         let payload = {
@@ -157,9 +157,14 @@ function reducer(state, action) {
         draft.images.push(payload);
       });
 
-    case ActionTypes.DELETE_IMAGE_DATA:
+    case ActionTypes.DELETE_IMAGE_DATA: //imageCroppers/scroller.js
       return produce(state, (draft) => {
         delete draft.images.splice(action.index, 1);
+      });
+
+    case ActionTypes.CLEAR_IMAGE_DATA: //students.js
+      return produce(state, (draft) => {
+        draft.images = [];
       });
 
     default:
