@@ -101,6 +101,7 @@ export default function App({ pageNumber, onIncrement }) {
       ) {
         const imageSrc = canvasImage.toDataURL();
         const image = await loadImgPromise(imageSrc);
+
         canvasPreview(image, previewCanvasRef.current, completedCrop);
       }
     },
@@ -110,7 +111,6 @@ export default function App({ pageNumber, onIncrement }) {
 
   function handleImageSelect() {
     if (completedCrop) {
-      debugger;
       const imageSrc = previewCanvasRef.current.toDataURL();
       const updatedCount = onIncrement();
       setIndexImageCount(indexImageCount + 1);
@@ -123,6 +123,20 @@ export default function App({ pageNumber, onIncrement }) {
         index: indexImageCount,
       });
     }
+  }
+
+  function handlePageSelect() {
+    const imageSrc = canvasImage.toDataURL();
+    const updatedCount = onIncrement();
+    setIndexImageCount(indexImageCount + 1);
+
+    context.dispatch({
+      type: ActionTypes.SAVE_PAGE_DATA,
+      imgSrc: imageSrc,
+      pageNumber: pageNumber,
+      tableNumber: updatedCount,
+      index: indexImageCount,
+    });
   }
 
   const loadImgPromise = (url) =>
@@ -192,6 +206,9 @@ export default function App({ pageNumber, onIncrement }) {
                 </Button>
               </>
             )}
+            <Button variant="primary" size="lg" onClick={handlePageSelect}>
+              Add Page
+            </Button>
           </div>
         </Col>
         <Col md={3}>

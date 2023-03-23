@@ -49,4 +49,3 @@ def get_transcripts_and_dump_into_disk(student, BASE_DIR):
     with open(output_file_path, 'wb') as output_pdf:
         pdf_writer.write(output_pdf)
     return output_file_path
-

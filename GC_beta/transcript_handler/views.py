@@ -214,33 +214,20 @@ def student_transcript(request, pk):
             return JsonResponse({}, status=404)
 
         images = request.FILES.getlist('snippedImages')
-        page_numbers = []
-        if(len(images) > 0):
-            new_processed_tables = []
-            for image in images:
-                filename = default_storage.save(f'{student.name}/{image.name}', image)
-                file_url = default_storage.url(filename)
-                substrings = image.name.split('-t')
-                pageNumber = substrings[0][1]  # Extract the character after the 'p'
-                tableNumber = substrings[1].split('.')[0]
-                new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data="",
-                                                    image_path=file_url)
-                new_processed_tables.append(new_processed_table)
-                page_numbers.append(pageNumber)
-        else:
-            pages = list(map(int, request.POST['validPages'].split(',')))
-            pdfFileObj = request.FILES['file'].read()
-            buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
-            print(request.POST['validPages'], pages, studentId)        
+        # page_numbers = []
+        option = "NEW"
+        succeed = ExtractTableHandler.create_processed_tables(images, student, option, data=None)
+
+  
+        # else:
+        #     pages = list(map(int, request.POST['validPages'].split(',')))
+        #     pdfFileObj = request.FILES['file'].read()
+        #     buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
+        #     print(request.POST['validPages'], pages, studentId)        
         
         #student.transcript.raw_file.replace(buffer)
-        student.transcript.processed_data = new_processed_tables
-        # #student.transcript.valid_pages = pages
-        student.transcript.valid_pages = list(map(int, page_numbers))
-        student.status = "NEW"
-        student.save()
-        #  --------------------------------
-        get_transcripts_and_dump_into_disk(student, BASE_DIR)
+
+        #get_transcripts_and_dump_into_disk(student, BASE_DIR)
         return JsonResponse({}, status=200)
 
 

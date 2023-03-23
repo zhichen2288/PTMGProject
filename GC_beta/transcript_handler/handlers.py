@@ -50,26 +50,101 @@ class ExtractTableHandler(GenericTranscriptHandler):
         student.save()
         return True
 
+    def create_processed_tables(self, images, student, option, data={}):
+        page_numbers = []
+        
+        if(option == "NEW"): 
+            if(len(images) > 0):
+                new_processed_tables = []
+                for image in images:
+                    filename = default_storage.save(f'{student.name}/{image.name}', image)
+                    file_url = default_storage.url(filename)
+                    substrings = image.name.split('-t')
+                    pageNumber = substrings[0][1]  # Extract the character after the 'p'
+                    tableNumber = substrings[1].split('.')[0]
+                    new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data="",
+                                                        image_path=file_url)
+                    new_processed_tables.append(new_processed_table)
+                    page_numbers.append(pageNumber)
+                student.transcript.processed_data = new_processed_tables
+                student.status = "NEW"
+        # adding new tables to existing tables after extraction is done                    
+        else: 
+            new_processed_tables = []
+            index = 0
+            student_tables_count = len(student.transcript.processed_data)
+            for i in range(student_tables_count):
+                if(student.transcript.processed_data[i].image_path == data['table_data'].image_path):
+                    current_table = student.transcript.processed_data[i]
+                    index = i
+
+            if(current_table.table_data == ""):
+                # file_url = current_table.image_path
+                pageNumber = current_table.page
+                # tableNumber = current_table.table_num 
+                # new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data=data['data'],
+                #                                 image_path=file_url)
+                # new_processed_tables.append(new_processed_table) 
+                status = self.save_response_db(data['data'], student, index)
+
+            else:
+                new_processed_tables = student.transcript.processed_data
+                file_url = current_table.image_path
+                pageNumber = data['table_data'].page
+                tableNumber = data['table_data'].table_num
+                new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data=data['data'],
+                                                image_path=file_url)
+                new_processed_tables.append(new_processed_table)
+                student.transcript.processed_data = new_processed_tables
+
+            page_numbers.append(pageNumber)
+            student.status = "PREPARED"
+
+        student.transcript.valid_pages = list(map(int, page_numbers))
+        student.save()
+        return True
+
     def get_extractTable_data(self, student, force_new=False):
         paths = self._compose_paths(student)
         os_path = default_storage.location
         table_data = student.transcript.processed_data
-        json_tables = []
-        for i in range(len(table_data)):
+        # json_tables = []
+        for i in range(len(table_data)):    
             abs_path = os_path.split('\\media')[0]
             db_img_path = os.path.normpath(table_data[i].image_path)
             extracted_output = self.et_sess.process_file(filepath=f'{abs_path}{db_img_path}', output_format="df")
-            image_name = table_data[i].image_path.split('/')[-1].split('.')[0]
+            json_table = self.create_table_data(student, extracted_output, table_data, paths, i)
+            # if(json_table == ""):
+            #     continue
+            # json_tables.append(json_table)
+
+
+        # if(json_tables != []):
+    
+        return True
+
+    def create_table_data(self, student, extracted_output, table_data, paths, index):
+        if(len(extracted_output) == 1):
+            image_name = table_data[index].image_path.split('/')[-1].split('.')[0]
             self.save_response_CSV_JSON(paths['output_dir'], extracted_output, image_name)
             json_table = self.get_json_data(extracted_output)
-            json_tables.append(json_table)
+            self.save_response_db(json_table, student, index)
+        elif(len(extracted_output) > 1):
+            for i,df in enumerate(extracted_output):
+                data = []
+                data.append(df)
+                option = "OLD"
+                image_name = table_data[index].image_path.split('/')[-1].split('.')[0]
+                self.save_response_CSV_JSON(paths['output_dir'], data, image_name)
+                json_table = self.get_json_data(data)
+                blob = {'filename': image_name, 'data': json_table, 'table_data': table_data[index], 'table_num':i}
+                status = self.create_processed_tables(table_data[index], student, option, blob)
+                json_table = ""
 
-        self.save_response_db(json_tables, student, len(table_data))
-        return True
+        return json_table
 
     def get_json_data(self, tables):
         tables_number = len(tables)
-        #tables_in_json = []
         for i in range(tables_number):
             table = tables[i]   
             try:
@@ -81,14 +156,11 @@ class ExtractTableHandler(GenericTranscriptHandler):
             #tables_in_json.append(json_string)
         return json_string
 
-    def save_response_db(self, json_tables, student, tables_number):
-        for i in range(tables_number):
-            student.transcript.processed_data[i].table_data = json_tables[i]
-            
+    def save_response_db(self, json_table, student, index):
+        student.transcript.processed_data[index].table_data = json_table    
         student.status = "PREPARED"
         student.save()
         return True
-
 
     def save_response_CSV_JSON(self, output_dir, table_data, image_name):
         try:
@@ -105,6 +177,115 @@ class ExtractTableHandler(GenericTranscriptHandler):
             return True
         except: 
             return False
+
+    def _dump_processed_transcripts_to_ProcessedTable(self, tables_in_json, image_file_paths, table_page_mappings):
+        new_processed_tables = []
+        tables_number = len(tables_in_json)
+        for i in range(tables_number):
+            new_processed_table = ProcessedTable(page=table_page_mappings[i], table_num=i, table_data=tables_in_json[i],
+                                                 image_path=image_file_paths[i])
+            new_processed_tables.append(new_processed_table)
+        return new_processed_tables
+
+    def get_usage(self):
+        usage = self.et_sess.check_usage()
+        return usage
+
+    def _compose_paths(self, student):
+        paths = {}
+        paths['input_file_path'] = os.path.join(BASE_DIR, "media", student.name,
+                                                f'{student.name}-raw-transcripts.pdf')
+        paths['output_dir'] = os.path.join(BASE_DIR, "media", student.name)
+        return paths
+
+    def _dump_response_to_json(self, tables):
+        tables_number = len(tables)
+        tables_in_json = []
+        for i in range(tables_number):
+            table = tables[i]
+            try:
+                table.columns = table.iloc[0]
+            except:
+                pass
+            table = table.iloc[1:, :].fillna('')
+            json_string = table.to_json(orient="table")
+            tables_in_json.append(json_string)
+        return tables_in_json
+
+    def _dump_response(self, outdir, tables):
+        """
+        dump table data(df as .csv) and raw server response(.json)
+        also, dump dfs into json and serialize the json to strings, then save to the database for future use
+        """
+        try:
+            if not os.path.exists(outdir):
+                os.mkdir(outdir)
+            tables_number = len(self.et_sess.ServerResponse.json()['Tables'])
+            for i in range(tables_number):
+                tables[i].to_csv(os.path.join(outdir, f'table-{i}.csv'), index=False)
+                data_folder = Path(outdir)
+                file_to_open = data_folder / "server_response.json"
+                f = open(file_to_open, 'w', encoding='utf-8')
+                json.dump(self.et_sess.ServerResponse.json(), f, ensure_ascii=False, indent=4)
+            # return tables_in_json
+            return True
+        except:
+            return False
+
+    def _read_response(self, student):
+        paths = self._compose_paths(student)
+        tables = []  # dfs
+        server_response = None  # json
+        outdir = paths['output_dir']
+        print('reading server response...')
+        with open(os.path.join(outdir, 'server_response.json')) as json_file:
+            server_response = json.load(json_file)
+        table_data_files = [f'table-{x}.csv' for x in range(len(server_response['Tables']))]
+        for f in table_data_files:
+            try:
+                t = pd.read_csv(os.path.join(outdir, f))
+            except:
+                continue
+            tables.append(t)
+            print('reading', f)
+        return tables, server_response
+
+    def _draw_rectangle_on_image_and_dump(self, base_dir, page_idx, table_idx, coors, student):
+        input_image_path = os.path.join(base_dir, f"p{page_idx}.png")
+        output_image_path = os.path.join(base_dir, f"p{page_idx}-t{table_idx}.png")
+        #localhost_image_path = os.path.join("http:\\\\localhost:8080", student_name, f"p{page_idx}-t{table_idx}.png")
+        file_path = Path(student.name, f"p{page_idx}-t{table_idx}.png")
+        url = urljoin('http://localhost:8000/media/',str(file_path))
+        localhost_image_path = url
+        image = Image.open(input_image_path)
+        width, height = image.size
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((coors[0] * width, coors[1] * height, coors[2] * width, coors[3] * height), outline=128, width=5)
+        #     image.show()
+        print(f'compressing p{page_idx}-t{table_idx}.png ...')
+        #image = image.resize((int(width * 0.7), int(height * 0.7)), Image.ANTIALIAS)
+        image.save(output_image_path, quality=100, subsampling=0)
+        return localhost_image_path
+
+    def _get_table_border_images(self, input_pdf_path, output_path, server_response, dfs, student):
+        """
+        0. read pdf and extract iamges
+        1. generate base image (on pages)
+        2. draw rectangles (on tables)
+        3. save
+        input_pdf_path: input pdf path
+        """
+        self._extract_image_from_pdf_and_dump(input_pdf_path, output_path)
+        image_file_paths = []  # localhost path
+        table_page_mappings = []  # table i in page x
+        for i, table in enumerate(server_response['Tables']):
+            print(f'preparing table {i}')
+            coors = self._get_table_coor(i, server_response, dfs)
+            localhost_image_path = self._draw_rectangle_on_image_and_dump(output_path, table["Page"] - 1, i, coors, student)
+            table_page_mappings.append(table["Page"] - 1)
+            image_file_paths.append(localhost_image_path)
+        return image_file_paths, table_page_mappings
+
 
     def calculate_gpa(self, student):
         student_university = student.education.university
@@ -527,78 +708,6 @@ class ExtractTableHandler(GenericTranscriptHandler):
         print(f'GPA of student {student.name} is {gpa}.')
         return round(gpa, 2)
 
-    def _dump_processed_transcripts_to_ProcessedTable(self, tables_in_json, image_file_paths, table_page_mappings):
-        new_processed_tables = []
-        tables_number = len(tables_in_json)
-        for i in range(tables_number):
-            new_processed_table = ProcessedTable(page=table_page_mappings[i], table_num=i, table_data=tables_in_json[i],
-                                                 image_path=image_file_paths[i])
-            new_processed_tables.append(new_processed_table)
-        return new_processed_tables
-
-    def get_usage(self):
-        usage = self.et_sess.check_usage()
-        return usage
-
-    def _compose_paths(self, student):
-        paths = {}
-        paths['input_file_path'] = os.path.join(BASE_DIR, "media", student.name,
-                                                f'{student.name}-raw-transcripts.pdf')
-        paths['output_dir'] = os.path.join(BASE_DIR, "media", student.name)
-        return paths
-
-    def _dump_response_to_json(self, tables):
-        tables_number = len(tables)
-        tables_in_json = []
-        for i in range(tables_number):
-            table = tables[i]
-            try:
-                table.columns = table.iloc[0]
-            except:
-                pass
-            table = table.iloc[1:, :].fillna('')
-            json_string = table.to_json(orient="table")
-            tables_in_json.append(json_string)
-        return tables_in_json
-
-    def _dump_response(self, outdir, tables):
-        """
-        dump table data(df as .csv) and raw server response(.json)
-        also, dump dfs into json and serialize the json to strings, then save to the database for future use
-        """
-        try:
-            if not os.path.exists(outdir):
-                os.mkdir(outdir)
-            tables_number = len(self.et_sess.ServerResponse.json()['Tables'])
-            for i in range(tables_number):
-                tables[i].to_csv(os.path.join(outdir, f'table-{i}.csv'), index=False)
-                data_folder = Path(outdir)
-                file_to_open = data_folder / "server_response.json"
-                f = open(file_to_open, 'w', encoding='utf-8')
-                json.dump(self.et_sess.ServerResponse.json(), f, ensure_ascii=False, indent=4)
-            # return tables_in_json
-            return True
-        except:
-            return False
-
-    def _read_response(self, student):
-        paths = self._compose_paths(student)
-        tables = []  # dfs
-        server_response = None  # json
-        outdir = paths['output_dir']
-        print('reading server response...')
-        with open(os.path.join(outdir, 'server_response.json')) as json_file:
-            server_response = json.load(json_file)
-        table_data_files = [f'table-{x}.csv' for x in range(len(server_response['Tables']))]
-        for f in table_data_files:
-            try:
-                t = pd.read_csv(os.path.join(outdir, f))
-            except:
-                continue
-            tables.append(t)
-            print('reading', f)
-        return tables, server_response
-
     def _get_cell_confidence(self, i, r, c, server_response):
         """
         i: index of the table
@@ -682,54 +791,6 @@ class ExtractTableHandler(GenericTranscriptHandler):
             # page.setRotation(page.rotation)
             pix = page.get_pixmap()
             pix.save(output_path + "\\p%s.png" % (i))
-
-    # for i in range(len(doc)):
-    #     for img in doc.get_page_images(i):
-    #         xref = img[0]
-    #         pix = fitz.Pixmap(doc, xref)
-    #         if pix.n < 5:  # this is GRAY or RGB
-    #             pix.save(output_path + "\\p%s.png" % (i))
-    #         else:  # CMYK: convert to RGB first
-    #             pix1 = fitz.Pixmap(fitz.csRGB, pix)
-    #             pix1.save(output_path + "\\p%s.png" % (i))
-    #             pix1 = None
-    #         pix = None
-
-    def _draw_rectangle_on_image_and_dump(self, base_dir, page_idx, table_idx, coors, student):
-        input_image_path = os.path.join(base_dir, f"p{page_idx}.png")
-        output_image_path = os.path.join(base_dir, f"p{page_idx}-t{table_idx}.png")
-        #localhost_image_path = os.path.join("http:\\\\localhost:8080", student_name, f"p{page_idx}-t{table_idx}.png")
-        file_path = Path(student.name, f"p{page_idx}-t{table_idx}.png")
-        url = urljoin('http://localhost:8000/media/',str(file_path))
-        localhost_image_path = url
-        image = Image.open(input_image_path)
-        width, height = image.size
-        draw = ImageDraw.Draw(image)
-        draw.rectangle((coors[0] * width, coors[1] * height, coors[2] * width, coors[3] * height), outline=128, width=5)
-        #     image.show()
-        print(f'compressing p{page_idx}-t{table_idx}.png ...')
-        #image = image.resize((int(width * 0.7), int(height * 0.7)), Image.ANTIALIAS)
-        image.save(output_image_path, quality=100, subsampling=0)
-        return localhost_image_path
-
-    def _get_table_border_images(self, input_pdf_path, output_path, server_response, dfs, student):
-        """
-        0. read pdf and extract iamges
-        1. generate base image (on pages)
-        2. draw rectangles (on tables)
-        3. save
-        input_pdf_path: input pdf path
-        """
-        self._extract_image_from_pdf_and_dump(input_pdf_path, output_path)
-        image_file_paths = []  # localhost path
-        table_page_mappings = []  # table i in page x
-        for i, table in enumerate(server_response['Tables']):
-            print(f'preparing table {i}')
-            coors = self._get_table_coor(i, server_response, dfs)
-            localhost_image_path = self._draw_rectangle_on_image_and_dump(output_path, table["Page"] - 1, i, coors, student)
-            table_page_mappings.append(table["Page"] - 1)
-            image_file_paths.append(localhost_image_path)
-        return image_file_paths, table_page_mappings
 
 
 ExtractTableHandler = ExtractTableHandler()

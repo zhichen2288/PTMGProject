@@ -146,8 +146,24 @@ function reducer(state, action) {
       };
 
     case ActionTypes.SAVE_IMAGE_DATA: //imageCroppers/imageCrop.js
-      console.log("reducer state ", state);
       return produce(state, (draft) => {
+        let payload = {
+          index: action.index,
+          imageSrc: action.imgSrc,
+          pageNumber: action.pageNumber,
+          tableNumber: action.tableNumber,
+        };
+        draft.images.push(payload);
+      });
+
+    case ActionTypes.SAVE_PAGE_DATA: //imageCroppers/imageCrop.js
+      const updatedState = produce(state, (draft) => {
+        draft.images = draft.images.filter(
+          (obj) => obj["pageNumber"] !== action.pageNumber
+        );
+      });
+
+      return produce(updatedState, (draft) => {
         let payload = {
           index: action.index,
           imageSrc: action.imgSrc,
