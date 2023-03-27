@@ -44,9 +44,14 @@ export default () => {
     fetchData();
   }, []);
 
-  async function saveTableData(e) {
-    let result = window.confirm("Please make sure all changes are correct!");
-    if (!result) return;
+  useEffect(() => {
+    saveTableData();
+  }, [context.state]);
+
+  async function saveTableData() {
+    if (context.state.data === "") return;
+    //let result = window.confirm("Please make sure all changes are correct!");
+    //if (!result) return;
     let data = [];
     let stateObject = [...context.state.data];
 
@@ -186,7 +191,7 @@ export default () => {
             <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
           </Col>
           <Col>
-            <Button onClick={(e) => saveTableData(e)}>Save Table Data</Button>
+            <Button onClick={(e) => saveTableData()}>Save Table Data</Button>
           </Col>
           <Col>
             <Link

@@ -110,7 +110,8 @@ class ExtractTableHandler(GenericTranscriptHandler):
         table_data = student.transcript.processed_data
         # json_tables = []
         for i in range(len(table_data)):    
-            abs_path = os_path.split('\\media')[0]
+            #abs_path = os_path.split('\\media')[0]
+            abs_path = os.path.join(os.getcwd(), 'GC_beta')
             db_img_path = os.path.normpath(table_data[i].image_path)
             extracted_output = self.et_sess.process_file(filepath=f'{abs_path}{db_img_path}', output_format="df")
             json_table = self.create_table_data(student, extracted_output, table_data, paths, i)

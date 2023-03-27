@@ -137,6 +137,7 @@ function reducer(state, action) {
     case ActionTypes.CALL_API:
       return {
         ...state,
+        data: "",
       };
 
     case ActionTypes.SUCCESS:

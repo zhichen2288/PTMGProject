@@ -63,6 +63,11 @@ export default () => {
   const context = useContext(StateContext);
 
   useEffect(() => {
+    context.dispatch({ type: ActionTypes.CALL_API });
+    console.log("context", context.state);
+  }, []);
+
+  useEffect(() => {
     if (students.length === 0) {
       fetchData();
       document.title = `Students List`;

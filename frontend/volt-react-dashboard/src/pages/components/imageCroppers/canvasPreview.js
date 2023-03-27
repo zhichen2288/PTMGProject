@@ -7,7 +7,11 @@ export async function canvasPreview(
   canvas,
   crop,
   scale = 1,
-  rotate = 0
+  rotate = 0,
+  snipX,
+  snipY,
+  snipWidth,
+  snipHeight
 ) {
   const ctx = canvas.getContext("2d");
 
@@ -24,8 +28,16 @@ export async function canvasPreview(
   const pixelRatio = window.devicePixelRatio;
   //const pixelRatio = 1;
 
+  // Calculate the canvas dimensions and position based on the user's snip
+  // const canvasX = (snipX - crop.x) * scaleX * pixelRatio;
+  // const canvasY = (snipY - crop.y) * scaleY * pixelRatio;
+  // const canvasWidth = snipWidth * scaleX * pixelRatio;
+  // const canvasHeight = snipHeight * scaleY * pixelRatio;
+
   canvas.width = Math.floor(crop.width * scaleX * pixelRatio);
   canvas.height = Math.floor(crop.height * scaleY * pixelRatio);
+  // canvas.width = canvasWidth;
+  // canvas.height = canvasHeight;
 
   ctx.scale(pixelRatio, pixelRatio);
   ctx.imageSmoothingQuality = "high";
@@ -60,5 +72,17 @@ export async function canvasPreview(
     image.naturalWidth,
     image.naturalHeight
   );
+  // ctx.drawImage(
+  //   image,
+  //   snipX,
+  //   snipY,
+  //   snipWidth,
+  //   snipHeight,
+  //   canvasX,
+  //   canvasY,
+  //   canvasWidth,
+  //   canvasHeight
+  // );
+
   ctx.restore();
 }
