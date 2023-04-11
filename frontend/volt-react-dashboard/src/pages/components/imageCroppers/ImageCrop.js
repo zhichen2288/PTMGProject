@@ -1,23 +1,7 @@
 import React, { useState, useRef, useContext } from "react";
-import {
-  Breadcrumb,
-  Button,
-  ButtonGroup,
-  Row,
-  Col,
-  InputGroup,
-  Form,
-  Dropdown,
-  Card,
-  Table,
-  Image,
-  DropdownButton,
-  Modal,
-  Spinner,
-  Container,
-} from "@themesberg/react-bootstrap";
+import { Button, Row, Col, Container } from "@themesberg/react-bootstrap";
 
-import { Document, Page } from "react-pdf";
+import { Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 
 import ReactCrop, {

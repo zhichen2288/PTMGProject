@@ -10,6 +10,7 @@ const initialState = {
   table_idx: 0,
   highlightCellData: "",
   images: [],
+  consolidatedData: [],
 };
 
 function reducer(state, action) {
@@ -183,6 +184,14 @@ function reducer(state, action) {
       return produce(state, (draft) => {
         draft.images = [];
       });
+
+    case ActionTypes.SAVE_SELECTED_ROWS: //viewTabel.js
+      if (action.data.length > 0) {
+        return produce(state, (draft) => {
+          draft.consolidatedData = [];
+          draft.consolidatedData = action.data;
+        });
+      }
 
     default:
       return state;

@@ -83,6 +83,7 @@ export default function Cell({
         context.state.highlightCellData
       )) {
         for (let [k, v] of Object.entries(value)) {
+          debugger;
           if (key === table_idx.toString()) {
             if (k !== "message") {
               k = parseInt(k);

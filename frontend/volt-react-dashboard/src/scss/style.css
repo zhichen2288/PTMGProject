@@ -382,3 +382,22 @@ html {
 .ReactCrop {
   overflow-x: scroll !important;
 }
+
+/* ViewTable.js */
+.viewtable {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+.viewtable th,
+.viewtable td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.viewtable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}

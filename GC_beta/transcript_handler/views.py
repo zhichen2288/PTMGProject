@@ -19,7 +19,7 @@ from .serializers import UniversitySerializer, StudentSerializer, TranscriptSeri
 from .utils import extract_pages_from_raw_file, get_transcripts_and_dump_into_disk
 from GC_beta.settings import BASE_DIR
 import json
-from bson.json_util import dumps
+from bson import json_util
 from .System_GPA import GPA
 
 
@@ -185,14 +185,18 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
             
-            df = run_school_template(student.id)
-            #student.consolidatedData = json.dumps(consolidatedData['data']) 
-            student.consolidatedData = df.to_json(orient = 'records')
+            output_dict = run_school_template(student.id)
+            # #student.consolidatedData = json.dumps(consolidatedData['data']) 
+            #student.consolidatedData = df.to_json(orient = 'records')
+            student.consolidatedData = output_dict
             student.save()
             #processed_transcripts = StudentTable.objects.all()
             processed_transcripts = student.consolidatedData
+            consolidated_data_dict = student.consolidatedData.to_mongo()
+            json_string = json.dumps(consolidated_data_dict, default=json_util.default)
+
             #tables_in_dict = [json.loads(x.to_json()) for x in processed_transcripts]
-            return JsonResponse({'student_name': student.name, 'tables': processed_transcripts})
+            return JsonResponse({'student_name': student.name, 'data': json_string})
 
         elif request.GET.get('action') == 'calculateGPA':
             student = None

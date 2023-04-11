@@ -4,6 +4,7 @@ import pymongo
 from bson.objectid import ObjectId
 import json
 from .System_School_Template import SchoolTemplate
+from .models import University, Department, Transcript, ProcessedTable, TabContent, ConsolidatedData
 
 
 def get_page_data(sid):
@@ -72,9 +73,9 @@ def run_school_template(sid):
         i_table = table_list[i]
 
         # initialize object
-        school_obj = SchoolTemplate(school_name, i_table)
+        SchoolTemplate_obj = SchoolTemplate(school_name, i_table)
         try:
-            i_table_df = school_obj.apply_school_template()
+            i_table_df = SchoolTemplate_obj.apply_school_template()
         except Exception:
             #print("Could not process table %d" %(page_i))
             continue  
@@ -82,5 +83,26 @@ def run_school_template(sid):
         table_df = pd.concat([table_df, i_table_df])
 
     table_df.reset_index(drop = True, inplace = True)
+    table_df.fillna("", inplace = True)
+
+    # convert the dataframe to the json format to save in the mongoDB
+    table_df_2_dict = table_df.to_dict('split')
+    data = table_df_2_dict["data"]
+    column_list = table_df.columns
     
-    return table_df
+
+    data_list = []
+    for i_data in data:
+        i_row = {}
+        for i_column in enumerate(column_list):
+            i_row[i_column[1]] = i_data[i_column[0]]
+        data_list.append(i_row)
+
+    tabContent = []
+    tabs = []
+    tabs.append("main")
+    tab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
+    tabContent.append(tab)
+    consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabContent) 
+    
+    return consolidatedData
