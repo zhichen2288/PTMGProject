@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Button, Form, Tabs, Tab } from "@themesberg/react-bootstrap";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, InputGroup } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 // import { JsonToTable } from "react-json-to-table";
 import axios from "../utils/http-axios";
@@ -19,6 +19,7 @@ export default () => {
   const [selectedTab, setSelectedTab] = useState("");
   const [activeTab, setActiveTab] = useState("main");
   const [clearSelectedRows, setClearSelectedRows] = useState(false);
+  const [rowsDeleted, setRowsDeleted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,16 +28,23 @@ export default () => {
       );
       //const tabLength = response.data.data["tabs"].length;
       const tabData = [];
-      debugger;
       if (response.data && response.data.data) {
         const responseData = JSON.parse(response.data.data);
         if (responseData.tabContent && responseData.tabContent.length > 0) {
           responseData.tabContent.forEach((element) => {
-            tabData.push({
-              tabName: element.name,
-              data: JSON.parse(element.data),
-              gpa: element.GPA,
-            });
+            if (element.data === "") {
+              tabData.push({
+                tabName: element.name,
+                data: "",
+                gpa: element.GPA,
+              });
+            } else {
+              tabData.push({
+                tabName: element.name,
+                data: JSON.parse(element.data),
+                gpa: element.GPA,
+              });
+            }
           });
           setData({
             tabs: responseData.tabs,
@@ -52,18 +60,15 @@ export default () => {
 
       setStudentName(response.data["student_name"]);
       setIsLoading(false);
-
-      console.log(response);
     };
     fetchData();
     document.title = `View Table Data`;
   }, []);
 
-  async function calculateGPA(e) {
+  async function calculateGPA(e, tabName) {
     const response = await axios.get(
-      `/api/students/${params["id"]}/transcript?action=calculateGPA`
+      `/api/students/${params["id"]}/transcript?action=calculateGPA&tabname=${tabName}`
     );
-    console.log(response);
     if (response.data.result) {
       setcalcgpaText(response.data.result);
     }
@@ -84,14 +89,46 @@ export default () => {
     }
   };
 
-  function checkIfDuplicate(tabname, data) {
+  function handleRowsDeletion(tabName, newData) {
+    console.log(tabName, newData);
+    const tabContent = data.tabData.find((e) => e.tabName === tabName);
+    tabContent.data = newData.length > 0 ? newData : "";
+    setData({
+      ...data,
+      tabData: data.tabData,
+    });
+    saveDataToDB(tabName);
+  }
+
+  function checkIfDuplicate(tabname, tabdata) {
     const rowsToAdd = context.state.consolidatedData;
-    const combinedArr = _.unionWith(data, rowsToAdd, _.isEqual);
-    console.log("uniqueRows", combinedArr);
+    const combinedArr = _.unionWith(tabdata, rowsToAdd, _.isEqual);
+    if (combinedArr.length > 0) {
+      const tabContent = data.tabData.find((e) => e.tabName === tabname);
+      tabContent.data = combinedArr;
+
+      setData({
+        ...data,
+        tabData: data.tabData,
+      });
+      saveDataToDB("");
+    }
+  }
+
+  async function saveDataToDB(tabName) {
+    const response = await axios.post(
+      `/api/students/${params["id"]}/updateConsolidatedData`,
+      {
+        data: data,
+      }
+    );
+    if (response.status === 200) {
+      setActiveTab(tabName === "" ? selectedTab : tabName);
+      //alert("Data saved successfully");
+    }
   }
 
   const handleAddRow = (tabname) => {
-    debugger;
     setSelectedTab(tabname);
     setActiveTab("main");
   };
@@ -117,29 +154,32 @@ export default () => {
         >
           {data.tabData.map((tab, index) => (
             <Tab key={index} eventKey={tab.tabName} title={tab.tabName}>
-              <ViewTable
-                data={tab.data}
-                rowSelection={tab.tabName === "main"}
-                clearSelection={clearSelectedRows}
-              />
+              {tab.data !== "" && (
+                <ViewTable
+                  data={tab.data}
+                  rowSelection={tab.tabName === "main"}
+                  clearSelection={clearSelectedRows}
+                  onUpdateData={handleRowsDeletion}
+                  tabName={tab.tabName}
+                />
+              )}
 
-              <Container>
-                <Row className="justify-content-md-center">
-                  {tab.tabName !== "main" && (
-                    <Col sm={2}>
-                      {" "}
-                      <Button
-                        onClick={() => {
-                          handleAddRow(tab.tabName);
-                        }}
-                        variant="primary"
-                      >
-                        Add Row
-                      </Button>
-                    </Col>
-                  )}
-
-                  <Col sm={2}>
+              <Row className="justify-content-md-center">
+                {tab.tabName !== "main" && (
+                  <Col md="auto">
+                    {" "}
+                    <Button
+                      onClick={() => {
+                        handleAddRow(tab.tabName);
+                      }}
+                      variant="primary"
+                    >
+                      Add Row
+                    </Button>
+                  </Col>
+                )}
+                {tab.tabName === "main" && (
+                  <Col md="auto">
                     {" "}
                     <Button
                       onClick={() => {
@@ -150,31 +190,30 @@ export default () => {
                       Save
                     </Button>
                   </Col>
-                  <Col sm={4}>
-                    {" "}
+                )}
+
+                <Col md="auto">
+                  {" "}
+                  <InputGroup className="mb-3">
                     <Button
                       onClick={(e) => {
-                        calculateGPA(e);
+                        calculateGPA(e, tab.tabName);
                       }}
                       variant="primary"
                     >
                       Calculate GPA
                     </Button>
-                  </Col>
-                  <Col sm={4}>
-                    {" "}
                     <Form.Control
-                      placeholder="GPA..."
+                      placeholder={`  ${tab.tabName} GPA`}
                       readOnly={true}
                       id="gpaText"
                       name="gpaText"
                       onChange={handleChange}
-                      value={calcgpaText}
+                      value={tab.GPA}
                     />
-                    {/* <div className="vr" /> */}
-                  </Col>
-                </Row>
-              </Container>
+                  </InputGroup>
+                </Col>
+              </Row>
             </Tab>
           ))}
         </Tabs>

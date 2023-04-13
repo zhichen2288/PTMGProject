@@ -3,6 +3,8 @@ import { Button, Row, Col } from "@themesberg/react-bootstrap";
 import { useTable, useRowSelect } from "react-table";
 import StateContext from "../../context/stateContext";
 import { ActionTypes } from "../utils/studentTable";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinusSquare } from "@fortawesome/free-solid-svg-icons";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -25,6 +27,8 @@ export default function ViewTable({
   data = [],
   rowSelection = false,
   clearSelection = false,
+  onUpdateData,
+  tabName,
 }) {
   const context = useContext(StateContext);
 
@@ -52,9 +56,31 @@ export default function ViewTable({
         ...baseColumns,
       ];
     } else {
-      return baseColumns;
+      return [
+        ...baseColumns,
+        {
+          Header: "Actions",
+          Cell: ({ row }) => (
+            <div>
+              <button
+                className="delete-row-btn"
+                onClick={() => handleDelete(row)}
+              >
+                {" "}
+                <FontAwesomeIcon icon={faMinusSquare} />
+              </button>
+            </div>
+          ),
+        },
+      ];
     }
   }, [data, rowSelection]);
+
+  const handleDelete = (row) => {
+    const newData = data.filter((d) => d !== row.original);
+    onUpdateData(tabName, newData);
+    //   context.dispatch({ type: ActionTypes.SET_DATA, data: newData });
+  };
 
   const {
     getTableProps,

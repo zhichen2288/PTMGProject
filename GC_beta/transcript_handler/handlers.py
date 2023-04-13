@@ -1,4 +1,4 @@
-from .models import GenericTranscriptHandler, ProcessedTable
+from .models import ConsolidatedData, GenericTranscriptHandler, ProcessedTable
 import time
 from ExtractTable import ExtractTable
 import fitz
@@ -101,6 +101,7 @@ class ExtractTableHandler(GenericTranscriptHandler):
             student.status = "PREPARED"
 
         student.transcript.valid_pages = list(map(int, page_numbers))
+        student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
         student.save()
         return True
 

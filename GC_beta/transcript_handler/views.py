@@ -14,7 +14,7 @@ from .Run_Data_Check import run_data_check
 from .Run_School_Template import run_school_template
 
 from .handlers import ExtractTableHandler
-from .models import  ProcessedTable, StudentTable, University, Student, Department, Identifier, Transcript, Education
+from .models import  ConsolidatedData, ProcessedTable, StudentTable, TabContent, University, Student, Department, Identifier, Transcript, Education
 from .serializers import UniversitySerializer, StudentSerializer, TranscriptSerializer
 from .utils import extract_pages_from_raw_file, get_transcripts_and_dump_into_disk
 from GC_beta.settings import BASE_DIR
@@ -123,7 +123,23 @@ def update_transcript(request, pk):
 
     return JsonResponse({}, status=200)
 
-
+@csrf_exempt
+def update_Consolidated_Data(request, pk):
+    if request.method == "POST":
+        try:
+            student = Student.objects.get(id=pk)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=404)
+        
+        data = json.loads(request.body)
+        tabs = list(data['data']['tabs'])
+        tabData = []
+        for element in data['data']['tabData']:
+            tabData.append(TabContent(name = element['tabName'], data = json.dumps(element['data']), GPA = element['gpa']))
+        
+        student.consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabData) 
+        student.save()
+    return JsonResponse({}, status=200)
 
 @csrf_exempt
 def student_transcript(request, pk):
@@ -185,12 +201,11 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
             
-            output_dict = run_school_template(student.id)
-            # #student.consolidatedData = json.dumps(consolidatedData['data']) 
-            #student.consolidatedData = df.to_json(orient = 'records')
-            student.consolidatedData = output_dict
-            student.save()
-            #processed_transcripts = StudentTable.objects.all()
+            if(len(student.consolidatedData.tabContent) == 0):
+                output_dict = run_school_template(student.id, student)
+                student.consolidatedData = output_dict
+                student.save()
+
             processed_transcripts = student.consolidatedData
             consolidated_data_dict = student.consolidatedData.to_mongo()
             json_string = json.dumps(consolidated_data_dict, default=json_util.default)
@@ -204,9 +219,8 @@ def student_transcript(request, pk):
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
-        
-            df = run_school_template(student.id)
-            result = GPA(student.education.university, df)
+            tabName = request.GET.get('tabname')
+            result = GPA(student.id, tabName)
             return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
 
     elif request.method == 'POST':  # add new transcripts, default is override

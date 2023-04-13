@@ -371,6 +371,7 @@ html {
   cursor: pointer;
   color: red;
   padding-top: 10px;
+  border: none;
 }
 
 .invalidCell-false {

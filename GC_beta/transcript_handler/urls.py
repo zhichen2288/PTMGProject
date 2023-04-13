@@ -13,6 +13,7 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('api/students/<pk>/transcript', views.student_transcript, name='student_transcript'),
     path('api/students/<pk>/updateTranscript', views.update_transcript, name='update_transcript'),
+    path('api/students/<pk>/updateConsolidatedData', views.update_Consolidated_Data, name='update_Consolidated_Data'),
     path('test', views.test_route),
     path('get-usage', views.get_engine_usage)
 ]

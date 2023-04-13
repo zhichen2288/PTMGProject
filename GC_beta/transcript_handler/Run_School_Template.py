@@ -7,17 +7,21 @@ from .System_School_Template import SchoolTemplate
 from .models import University, Department, Transcript, ProcessedTable, TabContent, ConsolidatedData
 
 
-def get_page_data(sid):
+def get_page_data(student):
     # Access mongoDB
-    client = pymongo.MongoClient()
-    db = client.test
-    collection = db.student
+    # client = pymongo.MongoClient()
+    # db = client.test
+    # collection = db.student
     # * collection is like a table to hold document
     #   document is the thing we store in mongodb
-    
-    
-    ret = collection.find_one({'_id': sid})
-    
+   
+   
+    # ret = collection.find_one({'_id': sid})
+
+
+    processed_transcripts = student.transcript.processed_data
+    university = student.education.university
+   
     '''
     {"id": __,
      "transcript": {"processed_data": [{"page": 0,
@@ -37,7 +41,7 @@ def get_page_data(sid):
                                         "table_data": {"columns": [],
                                                        "data": []}}
                                       ]
-                   } 
+                   }
                    
                                                        
      "education": {"university": "___";
@@ -46,28 +50,28 @@ def get_page_data(sid):
      
      
     }
-    
+   
     '''
-    
-    
+   
+   
     # Get School Info
-    school_name = ret['education']['university']
+    school_name = university
 
     # Get table list
     table_list = []
-    for i in range(len(ret['transcript']['processed_data'])):
-        i_table = ret['transcript']['processed_data'][i]["table_data"]
+    for i in range(len(processed_transcripts)):
+        i_table = processed_transcripts[i]["table_data"]
         i_table = json.loads(i_table)
-        
+       
         table_list.append(i_table)
-    
+   
     return school_name, table_list
 
 
-def run_school_template(sid):
-    
-    school_name, table_list = get_page_data(sid)
-    
+def run_school_template(sid, student):
+   
+    school_name, table_list = get_page_data(student)
+   
     table_df = pd.DataFrame()
     for i in range(len(table_list)):
         i_table = table_list[i]
@@ -89,7 +93,7 @@ def run_school_template(sid):
     table_df_2_dict = table_df.to_dict('split')
     data = table_df_2_dict["data"]
     column_list = table_df.columns
-    
+   
 
     data_list = []
     for i_data in data:
@@ -101,8 +105,12 @@ def run_school_template(sid):
     tabContent = []
     tabs = []
     tabs.append("main")
-    tab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
-    tabContent.append(tab)
-    consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabContent) 
-    
+    tabs.append("math")
+    maintab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
+    mathtab = TabContent(name = "math", data = "", GPA = "")
+    tabContent.append(maintab)
+    tabContent.append(mathtab)
+
+    consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabContent)
+   
     return consolidatedData
