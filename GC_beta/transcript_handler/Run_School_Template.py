@@ -106,7 +106,11 @@ def run_school_template(sid, student):
     tabs = []
     tabs.append("main")
     tabs.append("math")
-    maintab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
+    if(len(data_list) == 0):
+        maintab = TabContent(name = "main", data = "", GPA = "")
+    else:
+        maintab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
+
     mathtab = TabContent(name = "math", data = "", GPA = "")
     tabContent.append(maintab)
     tabContent.append(mathtab)
