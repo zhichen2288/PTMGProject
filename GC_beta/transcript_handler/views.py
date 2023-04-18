@@ -119,6 +119,7 @@ def update_transcript(request, pk):
             tables.append(new_table)
         
         student.transcript.processed_data = tables
+        student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
         student.save()
 
     return JsonResponse({}, status=200)

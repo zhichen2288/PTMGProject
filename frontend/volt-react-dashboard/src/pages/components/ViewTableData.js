@@ -1,11 +1,21 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, Form, Tabs, Tab } from "@themesberg/react-bootstrap";
+import {
+  Breadcrumb,
+  Button,
+  Form,
+  Tabs,
+  Tab,
+} from "@themesberg/react-bootstrap";
 import { Container, Row, Col, InputGroup } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHome, faPlus } from "@fortawesome/free-solid-svg-icons";
+
 import { useParams } from "react-router-dom";
 // import { JsonToTable } from "react-json-to-table";
 import axios from "../utils/http-axios";
 import ViewTable from "./ViewTable";
 import StateContext from "../../context/stateContext";
+import { Link } from "react-router-dom/cjs/react-router-dom.min";
 const _ = require("lodash");
 
 export default () => {
@@ -139,6 +149,26 @@ export default () => {
     <>
       <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
         <div className="mb-4 mb-lg-0">
+          <Breadcrumb
+            className="d-none d-md-inline-block"
+            listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
+          >
+            <Breadcrumb.Item>
+              <Link to="..">
+                <FontAwesomeIcon icon={faHome} />
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="../students">Students List</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to={`../view-transcripts/${params.id}`}>
+                Prepared Transcripts
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>View Table Data</Breadcrumb.Item>
+          </Breadcrumb>
+
           <h4>Transcript</h4>
           <p className="mb-0">
             You are viewing the processed transcript of student: {studentName}.
