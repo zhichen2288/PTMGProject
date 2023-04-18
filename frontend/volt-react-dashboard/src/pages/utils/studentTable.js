@@ -13,6 +13,8 @@ export async function makeData(studentId) {
   };
 }
 
+//Table reducer reference https://github.com/archit-p/editable-react-table
+
 async function getTableData(studentId) {
   let tableArray = [];
   let studentName = "";
@@ -21,9 +23,11 @@ async function getTableData(studentId) {
     `/api/students/${studentId}/transcript?action=view`
   );
   if (response.status === 200) {
-    debugger
     let data = response.data;
-    if (data.tables.length > 1 && (data.tables[0].modified == undefined || data.tables[0].modified === 0) ) {
+    if (
+      data.tables.length > 0 &&
+      (data.tables[0].modified == undefined || data.tables[0].modified === 0)
+    ) {
       studentName = data.student_name;
       data.tables.map((e) => {
         let tables = {};
@@ -35,43 +39,65 @@ async function getTableData(studentId) {
       });
       tableArray.map((e) => {
         let columnObject = [];
-        let rows = [];
         let columnNames = [];
 
         let parsedColumns = JSON.parse(e.table_data)["schema"]["fields"];
         let rowNames = JSON.parse(e.table_data)["data"];
-
-        rowNames.map((e) => {
-          e["ID"] = faker.mersenne.rand();
-        });
-        rowNames.forEach((element) => {
-          if (element[""] || element[""] === "") {
-            delete element[""];
-          }
-        });
-        rows.push(...rowNames);
-
+        let colIndex = 0;
         parsedColumns.map((n) => {
           let names = {};
-          if (n.name !== "") {
-            names["id"] = n.name;
-            names["accessor"] = n.name;
+          if (n.name !== "" || n.name !== null) {
+            names["id"] = colIndex.toString();
+            names["accessor"] = colIndex.toString();
             names["label"] = n.name;
             names["width"] = 100;
             names["disableResizing"] = "false";
             names["dataType"] = DataTypes.TEXT;
             columnNames.push(names);
+            colIndex++;
           }
         });
         columnNames.push({
-          id: 999999,
-          width: 20,
+          id: "999998",
+          width: 10,
+          label: "",
+          disableResizing: "true",
+          dataType: "options",
+        });
+
+        columnNames.push({
+          id: "999999",
+          width: 10,
           label: "+",
           disableResizing: "true",
           dataType: "null",
         });
+
         columnObject.push(columnNames);
-        e.table_data = { columns: columnNames, data: rowNames };
+
+        // rowNames.forEach((element) => {
+        //   if (element[""] || element[""] === "") {
+        //     delete element[""];
+        //   }
+        // });
+
+        let rowsOffset = [];
+        for (let r = 0; r < rowNames.length; r++) {
+          let row = {};
+          for (let c = 0; c < columnNames.length - 2; c++) {
+            if (columnNames[c].label == null) {
+              row[c] = rowNames[r]["nan"];
+            } else {
+              row[c] = rowNames[r][columnNames[c].label];
+            }
+          }
+          rowsOffset.push(row);
+        }
+        // rowsOffset.map((e) => {
+        //   e["background"] = [];
+        // });
+        console.log(rowsOffset);
+        e.table_data = { columns: columnNames, data: rowsOffset };
       });
     } else {
       studentName = data.student_name;
@@ -87,13 +113,19 @@ async function getTableData(studentId) {
 }
 
 export function shortId() {
-  return "_" + Math.random().toString(36).substr(2, 9);
+  return "_" + Math.random().toString(36).substring(2, 9);
 }
 
 export const ActionTypes = Object.freeze({
+  SAVE_SELECTED_ROWS: "save_selected_rows",
+  SAVE_PAGE_DATA: "save_page_data",
+  CLEAR_IMAGE_DATA: "clear_image_data",
+  DELETE_IMAGE_DATA: "delete_image_data",
+  SAVE_IMAGE_DATA: "save_image_data",
   UPDATE_TABLE_CONFIG: "update_table_config",
-  ADD_OPTION_TO_COLUMN: "add_option_to_column",
+  HIGHLIGHT_CELL: "highlight_cell",
   ADD_ROW: "add_row",
+  DELETE_ROW: "delete_row",
   UPDATE_COLUMN_TYPE: "update_column_type",
   UPDATE_COLUMN_HEADER: "update_column_header",
   UPDATE_CELL: "update_cell",
@@ -110,7 +142,6 @@ export const DataTypes = Object.freeze({
   TEXT: "text",
   SELECT: "select",
 });
-
 
 export const universityNames = [
   {
@@ -149,6 +180,7 @@ export const universityNames = [
   },
   { value: "Mumbai University", label: "Mumbai University" },
   { value: "NMIMS University", label: "NMIMS University" },
+  { value: "Other", label: "Other" },
   { value: "Pune University", label: "Pune University" },
   {
     value: "Ramrao Adik Institute of Technology",
@@ -197,7 +229,3 @@ export const universityNames = [
       "Zhejiang University of Science and TechnologyZhongnan University of Economics and Law",
   },
 ];
-
-
-
-

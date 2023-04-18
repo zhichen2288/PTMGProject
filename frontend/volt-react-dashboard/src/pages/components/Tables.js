@@ -12,6 +12,9 @@ import Header from "./studentTable/Header";
 import { FixedSizeList } from "react-window";
 import { ActionTypes, DataTypes } from "../utils/studentTable";
 import scrollbarWidth from "../components/studentTable/scrollbarWidth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faPlusSquare } from "@fortawesome/free-solid-svg-icons";
+
 import "../../scss/style.css";
 
 const defaultColumn = {
@@ -43,6 +46,7 @@ export default function Table({
       data,
       defaultColumn,
       dataDispatch,
+      table_idx,
       autoResetRowState: !skipReset,
     },
     useBlockLayout,
@@ -110,9 +114,12 @@ export default function Table({
               })
             }
           >
-            {/* <span className="svg-icon svg-gray icon-margin">
-              <PlusIcon />
-            </span> */}
+            <span
+              className="svg-icon svg-gray icon-margin"
+              title="Add new column"
+            >
+              <FontAwesomeIcon icon={faPlusSquare} style={{ color: "green" }} />{" "}
+            </span>
             New
           </div>
         </div>

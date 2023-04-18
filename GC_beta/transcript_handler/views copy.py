@@ -14,12 +14,12 @@ from .Run_Data_Check import run_data_check
 from .Run_School_Template import run_school_template
 
 from .handlers import ExtractTableHandler
-from .models import  ConsolidatedData, ProcessedTable, StudentTable, TabContent, University, Student, Department, Identifier, Transcript, Education
+from .models import  ProcessedTable, StudentTable, University, Student, Department, Identifier, Transcript, Education
 from .serializers import UniversitySerializer, StudentSerializer, TranscriptSerializer
 from .utils import extract_pages_from_raw_file, get_transcripts_and_dump_into_disk
 from GC_beta.settings import BASE_DIR
 import json
-from bson import json_util
+from bson.json_util import dumps
 from .System_GPA import GPA
 
 
@@ -119,28 +119,11 @@ def update_transcript(request, pk):
             tables.append(new_table)
         
         student.transcript.processed_data = tables
-        student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
         student.save()
 
     return JsonResponse({}, status=200)
 
-@csrf_exempt
-def update_Consolidated_Data(request, pk):
-    if request.method == "POST":
-        try:
-            student = Student.objects.get(id=pk)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=404)
-        
-        data = json.loads(request.body)
-        tabs = list(data['data']['tabs'])
-        tabData = []
-        for element in data['data']['tabData']:
-            tabData.append(TabContent(name = element['tabName'], data = json.dumps(element['data']), GPA = element['gpa']))
-        
-        student.consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabData) 
-        student.save()
-    return JsonResponse({}, status=200)
+
 
 @csrf_exempt
 def student_transcript(request, pk):
@@ -170,11 +153,10 @@ def student_transcript(request, pk):
                 return JsonResponse({'error': "student not found."}, status=404)
             if not len(student.transcript.valid_pages) > 0:
                 return JsonResponse({'error': "No uploaded file found."}, status=404)
-            #succeed = ExtractTableHandler.prepare_transcript(student)
-            succeed = ExtractTableHandler.get_extractTable_data(student)
+            succeed = ExtractTableHandler.prepare_transcript(student)
             return JsonResponse({'message': "okay"}, status=200) if succeed else JsonResponse(
                 {'message': "something went wrong."}, status=200)
- 
+
         elif request.GET.get('action') == 'view':
             student = None
             try:
@@ -202,17 +184,14 @@ def student_transcript(request, pk):
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
             
-            if(len(student.consolidatedData.tabContent) == 0):
-                output_dict = run_school_template(student.id, student)
-                student.consolidatedData = output_dict
-                student.save()
-                
+            df = run_school_template(student.id)
+            #student.consolidatedData = json.dumps(consolidatedData['data']) 
+            student.consolidatedData = df.to_json(orient = 'records')
+            student.save()
+            #processed_transcripts = StudentTable.objects.all()
             processed_transcripts = student.consolidatedData
-            consolidated_data_dict = student.consolidatedData.to_mongo()
-            json_string = json.dumps(consolidated_data_dict, default=json_util.default)
-
             #tables_in_dict = [json.loads(x.to_json()) for x in processed_transcripts]
-            return JsonResponse({'student_name': student.name, 'data': json_string})
+            return JsonResponse({'student_name': student.name, 'tables': processed_transcripts})
 
         elif request.GET.get('action') == 'calculateGPA':
             student = None
@@ -220,10 +199,10 @@ def student_transcript(request, pk):
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
-            tabName = request.GET.get('tabname')
-            result = GPA(student.id, tabName)
-            gpa = result.calculate_GPA()
-            return JsonResponse({'student_name': student.name, 'result': str(gpa)})
+        
+            df = run_school_template(student.id)
+            result = GPA(student.education.university, df)
+            return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
 
     elif request.method == 'POST':  # add new transcripts, default is override
         studentId = pk
@@ -234,20 +213,32 @@ def student_transcript(request, pk):
             return JsonResponse({}, status=404)
 
         images = request.FILES.getlist('snippedImages')
-        # page_numbers = []
-        option = "NEW"
-        succeed = ExtractTableHandler.create_processed_tables(images, student, option, data=None)
-
-  
-        # else:
-        #     pages = list(map(int, request.POST['validPages'].split(',')))
-        #     pdfFileObj = request.FILES['file'].read()
-        #     buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
-        #     print(request.POST['validPages'], pages, studentId)        
+        filenames = []
+        if(len(images) > 0):
+            new_processed_tables = []
+            for image in images:
+                filename = default_storage.save(f'{student.name}/{image.name}', image)
+                file_url = default_storage.url(filename)
+                substrings = image.name.split('-t')
+                pageNumber = substrings[0][1]  # Extract the character after the 'p'
+                tableNumber = substrings[1].split('.')[0]
+                new_processed_table = ProcessedTable(page=pageNumber, table_num=tableNumber, table_data="",
+                                                    image_path=file_url)
+                new_processed_tables.append(new_processed_table)
+                filenames.append(filename)
+        else:
+            pages = list(map(int, request.POST['validPages'].split(',')))
+            pdfFileObj = request.FILES['file'].read()
+            buffer = extract_pages_from_raw_file(io.BytesIO(pdfFileObj), pages)
+            print(request.POST['validPages'], pages, studentId)        
         
         #student.transcript.raw_file.replace(buffer)
-
-        #get_transcripts_and_dump_into_disk(student, BASE_DIR)
+        student.transcript.processed_data = new_processed_tables
+        # #student.transcript.valid_pages = pages
+        student.status = "NEW"
+        student.save()
+        #  --------------------------------
+        get_transcripts_and_dump_into_disk(student, BASE_DIR)
         return JsonResponse({}, status=200)
 
 

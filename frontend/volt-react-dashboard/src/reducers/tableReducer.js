@@ -1,19 +1,16 @@
-import React, { useEffect, useReducer } from "react";
-import Table from "../components/Tables";
 import produce from "immer";
 
-import {
-  shortId,
-  makeData,
-  ActionTypes,
-  DataTypes,
-} from "../utils/studentTable";
+import { shortId, ActionTypes, DataTypes } from "../pages/utils/studentTable";
+
 import update from "immutability-helper";
 
 const initialState = {
   data: "",
   skipReset: false,
   table_idx: 0,
+  highlightCellData: "",
+  images: [],
+  consolidatedData: [],
 };
 
 function reducer(state, action) {
@@ -118,20 +115,83 @@ function reducer(state, action) {
         columns: { $splice: [[deleteIndex, 1]] },
       });
 
+    case ActionTypes.DELETE_ROW:
+      return produce(state, (draft) => {
+        delete draft.data[state.table_idx].table_data.data.splice(
+          action.rowIndex,
+          1
+        );
+        draft.data[state.table_idx].table_data.data.forEach((element, i) => {
+          element["0"] = i + 1;
+        });
+        draft.highlightCellData = "";
+      });
+
+    case ActionTypes.HIGHLIGHT_CELL:
+      return produce(state, (draft) => {
+        draft.highlightCellData = action.data;
+      });
+
     case ActionTypes.ENABLE_RESET:
       return update(state, { skipReset: { $set: true } });
 
     case ActionTypes.CALL_API:
       return {
         ...state,
+        data: "",
       };
 
     case ActionTypes.SUCCESS:
-      debugger;
       return {
         ...state,
         data: action.data,
       };
+
+    case ActionTypes.SAVE_IMAGE_DATA: //imageCroppers/imageCrop.js
+      return produce(state, (draft) => {
+        let payload = {
+          index: action.index,
+          imageSrc: action.imgSrc,
+          pageNumber: action.pageNumber,
+          tableNumber: action.tableNumber,
+        };
+        draft.images.push(payload);
+      });
+
+    case ActionTypes.SAVE_PAGE_DATA: //imageCroppers/imageCrop.js
+      const updatedState = produce(state, (draft) => {
+        draft.images = draft.images.filter(
+          (obj) => obj["pageNumber"] !== action.pageNumber
+        );
+      });
+
+      return produce(updatedState, (draft) => {
+        let payload = {
+          index: action.index,
+          imageSrc: action.imgSrc,
+          pageNumber: action.pageNumber,
+          tableNumber: action.tableNumber,
+        };
+        draft.images.push(payload);
+      });
+
+    case ActionTypes.DELETE_IMAGE_DATA: //imageCroppers/scroller.js
+      return produce(state, (draft) => {
+        delete draft.images.splice(action.index, 1);
+      });
+
+    case ActionTypes.CLEAR_IMAGE_DATA: //students.js
+      return produce(state, (draft) => {
+        draft.images = [];
+      });
+
+    case ActionTypes.SAVE_SELECTED_ROWS: //viewTabel.js
+      if (action.data.length > 0) {
+        return produce(state, (draft) => {
+          draft.consolidatedData = [];
+          draft.consolidatedData = action.data;
+        });
+      }
 
     default:
       return state;
@@ -142,4 +202,5 @@ let exported = {
   reducer,
   initialState,
 };
+
 export default exported;

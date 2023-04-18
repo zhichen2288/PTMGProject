@@ -11,7 +11,7 @@ Volt React is a free and open source admin dashboard template built in React.js 
 
 ## Powered by React.js
 
-Volt React is an extension of the popular [react-bootstrap](https://react-bootstrap.github.io/) library and it is based on the newest version of Bootstrap 5. 
+Volt React is an extension of the popular [react-bootstrap](https://react-bootstrap.github.io/) library and it is based on the newest version of Bootstrap 5.
 
 ## Data-driven
 
@@ -48,44 +48,43 @@ This product is built using the following widely used technologies:
 
 ## Table of Contents
 
-* [Version](#versions)
-* [Demo](#demo)
-* [Quick Start](#quick-start)
-* [Documentation](#documentation)
-* [File Structure](#file-structure)
-* [Browser Support](#browser-support)
-* [Resources](#resources)
-* [Upgrade to PRO](#upgrade-to-pro)
-* [Reporting Issues](#reporting-issues)
-* [Technical Support or Questions](#technical-support-or-questions)
-* [Licensing](#licensing)
-* [Useful Links](#useful-links)
-
+- [Version](#versions)
+- [Demo](#demo)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [File Structure](#file-structure)
+- [Browser Support](#browser-support)
+- [Resources](#resources)
+- [Upgrade to PRO](#upgrade-to-pro)
+- [Reporting Issues](#reporting-issues)
+- [Technical Support or Questions](#technical-support-or-questions)
+- [Licensing](#licensing)
+- [Useful Links](#useful-links)
 
 ## Versions
 
 [<img src="https://github.com/creativetimofficial/public-assets/blob/master/logos/html-logo.jpg?raw=true" width="60" height="60" />](https://themesberg.com/product/admin-dashboard/volt-bootstrap-5-dashboard)[<img src="https://github.com/creativetimofficial/public-assets/blob/master/logos/react-logo.jpg?raw=true" width="60" height="60" />](https://themesberg.com/product/dashboard/volt-react)[<img src="https://themesberg.s3.us-east-2.amazonaws.com/public/github/technology/laravel-logo.jpeg" width="60" height="60" />](https://themesberg.com/product/laravel/volt-admin-dashboard-template).
 
-| HTML | React  |
-| --- | ---  |
-| [![Volt Bootstrap 5 Dashboard HTML](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-bootstrap-5-dashboard/volt-bootstrap-5-dashboard-preview.jpg)](https://github.com/themesberg/volt-bootstrap-5-dashboard) | [![Volt React Dashboard](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-react-dashboard/thumbnail.png)](https://demo.themesberg.com/volt-react-dashboard/)
+| HTML                                                                                                                                                                                                                            | React                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [![Volt Bootstrap 5 Dashboard HTML](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-bootstrap-5-dashboard/volt-bootstrap-5-dashboard-preview.jpg)](https://github.com/themesberg/volt-bootstrap-5-dashboard) | [![Volt React Dashboard](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-react-dashboard/thumbnail.png)](https://demo.themesberg.com/volt-react-dashboard/) |
 
 ## Demo
 
-| Dashboard | Transactions | Settings | Forms |
-| --- | --- | --- | --- |
-| [![Dashboard](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/overview.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/dashboard/overview) | [![Transactions](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/transactions.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/transactions) | [![Settings](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/settings.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/settings) | [![Tables](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/tables.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/tables/bootstrap-tables)
+| Dashboard                                                                                                                                                                                         | Transactions                                                                                                                                                                                       | Settings                                                                                                                                                                               | Forms                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Dashboard](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/overview.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/dashboard/overview) | [![Transactions](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/transactions.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/transactions) | [![Settings](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/settings.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/settings) | [![Tables](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/tables.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/tables/bootstrap-tables) |
 
-| Sign in | Sign up | Forgot password | Reset password |
-| --- | --- | --- | --- |
-| [![Sign in](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/sign-in.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/sign-in) | [![Sign up](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/sign-up.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/sign-up) | [![Forgot Password](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/forgot-password.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/forgot-password) | [![Reset password](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/reset-password.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/reset-password)
+| Sign in                                                                                                                                                                                      | Sign up                                                                                                                                                                                      | Forgot password                                                                                                                                                                                                      | Reset password                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Sign in](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/sign-in.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/sign-in) | [![Sign up](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/sign-up.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/sign-up) | [![Forgot Password](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/forgot-password.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/forgot-password) | [![Reset password](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/reset-password.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/reset-password) |
 
-| Lock Profile | 404 Not Found | 500 Server Error | Documentation |
-| --- | --- | --- | --- |
-| [![Lock Profile](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/lock.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/lock) | [![404 Not Found](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/404.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/404) | [![500 Server Error](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/500.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/500) | [![Documentation](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/docs.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/documentation/quick-start)
+| Lock Profile                                                                                                                                                                                | 404 Not Found                                                                                                                                                                              | 500 Server Error                                                                                                                                                                              | Documentation                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lock Profile](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/lock.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/lock) | [![404 Not Found](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/404.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/404) | [![500 Server Error](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/500.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/examples/500) | [![Documentation](https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-pro-react-dashboard/github/docs.jpg)](https://demo.themesberg.com/volt-react-dashboard/#/documentation/quick-start) |
 
--   [Live Demo](https://demo.themesberg.com/volt-react-dashboard)
--   [Download](https://themesberg.com/product/dashboard/volt-react)
+- [Live Demo](https://demo.themesberg.com/volt-react-dashboard)
+- [Download](https://themesberg.com/product/dashboard/volt-react)
 
 ## Quick start
 
@@ -122,7 +121,7 @@ yarn build
 4. After installing Node.js, open a terminal and run `npm install` in the main `volt-react-dashboard/` folder to download all project dependencies. You'll find them in the `node_modules/` folder.
 
 ```
-npm install
+npm install (node js version - 14.18.2)
 ```
 
 5. Then start the app in development mode by running the following command in terminal:

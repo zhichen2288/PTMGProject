@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import {
   Breadcrumb,
@@ -13,122 +13,52 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faPlus } from "@fortawesome/free-solid-svg-icons";
 import axios from "../utils/http-axios";
 import { JsonToTable } from "react-json-to-table";
+import { Document, Page } from "react-pdf";
+import { pdfjs } from "react-pdf";
+
 //Ry
-import reducer from "../reducers/tableReducer";
+import StateContext from "../../context/stateContext";
 import Table from "./Tables";
 import { ActionTypes, makeData } from "../utils/studentTable";
 
 export default () => {
-  debugger
-  let params = useParams();
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
-  const [state, dispatch] = useReducer(reducer.reducer, reducer.initialState);
+  let params = useParams();
 
   const [studentName, setStudentName] = useState("");
   const [tables, setTables] = useState([]);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isMaximized, setIsMaximized] = useState(true);
 
-  // useEffect(() => {
-  //   dispatch({ type: ActionTypes.ENABLE_RESET });
-  // }, [state.data]);
+  const context = useContext(StateContext);
 
-  // useEffect(() => {
-  //   if (tables.length === 0) {
-  //     fetchData();
-  //     document.title = `View Transcripts`;
-  //     console.log("viewing transcripts of student: ");
-  //   }
-  //   console.log(studentName);
-  // }, [studentName]);
-
-  // const fetchData = async () => {
-  //   const response = await axios
-  //     .get(`/api/students/${params["id"]}/transcript?action=view`)
-  //     .then((response) => {
-  //       //console.log(response.data['tables']);
-  //       setTables(response.data["tables"]);
-  //       setStudentName(response.data["student_name"]);
-  //     })
-  //     .catch();
-  // };
-
-  // const columns = [
-  //   {
-  //     //=(alldata) => [console.log(alldata[0]),
-  //     dataField: "index",
-  //     text: "index",
-  //   },
-  //   {
-  //     dataField: "Course Title",
-  //     text: "Course Title",
-  //   },
-  //   {
-  //     dataField: "Credit",
-  //     text: "Credit",
-  //   },
-  //   {
-  //     dataField: "Score",
-  //     text: "Score",
-  //   },
-  //   {
-  //     dataField: "Grade Point",
-  //     text: "Grade Point",
-  //   },
-  // ];
-
-  // const EditCell = ({ rowData, onChange, ...props }) => {
-  //   tables.map((table) => {
-  //     rowData = JSON.parse(table.table_data)["data"];
-
-  //     console.log(JSON.parse(table.table_data)["schema"]["fields"]);
-  //   });
-  //   console.log("obgynnnnnnnnnnnnnnnnnnnnnnnn");
-  //   console.log(rowData);
-  //   console.log("rowDatazzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-  //   return (
-  //     <Cell {...props}>
-  //       {rowData !== null ? (
-  //         <input className="input" defaultValue={JSON.stringify(rowData)} />
-  //       ) : (
-  //         rowData
-  //       )}
-  //     </Cell>
-  //   );
-  // };
-
-  //Ry---modified
-  // const onSaveData = async () => {
-  //   // const columns = Array.from(tableEl.querySelectorAll("th")).map(
-  //   //   (it) => it.textContent
-  //   // );
-  //   // const rows = tableEl.querySelectorAll("tbody > tr");
-  //   // return Array.from(rows).map((row) => {
-  //   //   const cells = Array.from(row.querySelectorAll("td"));
-  //   //   return columns.reduce((obj, col, idx) => {
-  //   //     obj[col] = cells[idx].textContent;
-  //   //     return obj;
-  //   //   }, {});
-  //   // });
-
-  //   console.log("Save data");
-  // };
-  console.log("state", state);
+  function toggleMaximize() {
+    setIsMaximized(!isMaximized);
+  }
 
   useEffect(() => {
-    dispatch({ type: ActionTypes.CALL_API });
+    context.dispatch({ type: ActionTypes.CALL_API });
     const fetchData = async () => {
       const response = await makeData(params["id"]);
-      if (response.data.length > 1) {
-        debugger
-        dispatch({ type: ActionTypes.SUCCESS, data: response.data });
+      if (response.data.length > 0) {
+        context.dispatch({ type: ActionTypes.SUCCESS, data: response.data });
       }
     };
     fetchData();
   }, []);
 
-  async function SaveTableData(e) {
-    debugger
+  useEffect(() => {
+    saveTableData();
+  }, [context.state]);
+
+  async function saveTableData() {
+    if (context.state.data === "") return;
+    //let result = window.confirm("Please make sure all changes are correct!");
+    //if (!result) return;
     let data = [];
-    let stateObject = [...state.data];
+    let stateObject = [...context.state.data];
 
     stateObject.map((i) => {
       let stateDBObject = {};
@@ -147,8 +77,25 @@ export default () => {
     );
   }
 
+  async function checkTableData(e) {
+    const response = await axios.get(
+      `/api/students/${params["id"]}/transcript?action=check_transcript_data`
+    );
+    if (response.status === 200) {
+      let data = response.data;
+      context.dispatch({
+        type: ActionTypes.HIGHLIGHT_CELL,
+        data: JSON.parse(data.data),
+      });
+    }
+  }
+
   function tableUpdate(e, idx) {
-    dispatch({ type: ActionTypes.UPDATE_TABLE_CONFIG, table_idx: idx });
+    context.dispatch({ type: ActionTypes.UPDATE_TABLE_CONFIG, table_idx: idx });
+  }
+
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
   }
 
   return (
@@ -160,33 +107,34 @@ export default () => {
             listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
           >
             <Breadcrumb.Item>
-              <FontAwesomeIcon icon={faHome} />
+              <Link to="..">
+                <FontAwesomeIcon icon={faHome} />
+              </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>Students List</Breadcrumb.Item>
-            <Breadcrumb.Item active>Prepared Transcripts</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="../students">Students List</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>
+              <Link to={`../view-transcripts/${params.id}`}>
+                Prepared Transcripts
+              </Link>
+            </Breadcrumb.Item>
           </Breadcrumb>
           <h4>Prepared Transcripts</h4>
-          <p className="mb-0">
+          {/* <p className="mb-0">
             You are viewing the processed transcript of student [{studentName}].
-          </p>
-        </div>
-        <div className="btn-toolbar mb-2 mb-md-0">
-          <Button variant="primary" size="sm">
-            <FontAwesomeIcon icon={faPlus} className="me-2" /> Add New Student
-          </Button>
+          </p> */}
         </div>
       </div>
       <Accordion defaultActiveKey="0">
-        {state.data &&
-          state.data.map((table, idx) => {
-            // let columnNames = JSON.parse(table.table_data)["schema"]["fields"];
-            // const newColumnNames = columnNames.map((v) => ({
-            //   ...v,
-            //   dataField: v.name,
-            //   text: v.name,
-            // }));
-            console.log("state", state);
-
+        {context.state.data &&
+          context.state.data.map((table, idx) => {
+            let pdfImagePath = table.image_path.substring(
+              0,
+              table.image_path.lastIndexOf("\\") + 1
+            );
+            pdfImagePath = pdfImagePath + `${studentName}-raw-transcripts.pdf`;
+            let serverUrl = "http://localhost:8000" + table.image_path;
             return (
               <Accordion.Item eventKey={idx} key={"table-" + idx}>
                 <Accordion.Header onClick={(e) => tableUpdate(e, idx)}>
@@ -195,36 +143,38 @@ export default () => {
                 <Accordion.Body>
                   <Row>
                     <Col>
-                      <Image src={table.image_path} />
+                      <Image
+                        alt="image"
+                        src={serverUrl}
+                        onClick={toggleMaximize}
+                        style={{
+                          maxWidth: isMaximized
+                            ? "100%"
+                            : window.innerWidth + "px",
+                        }}
+                      />
+                      {/* <Document
+                        file={pdfImagePath}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={pageNumber} />
+                      </Document> */}
                     </Col>
                     {/* Ry*/}
                     <Col>
-                      {/* <BootstrapTable
-                      key={`$(table.page) "+" $(table.table_num)`}
-                      keyField="index"
-                      data={JSON.parse(table.table_data)["data"]}
-                      columns={newColumnNames}
-                      // cellEdit={cellEditFactory({
-                      //   mode: "click",
-                      //   blurToSave: true,
-                      // })}
-                    /> */}
                       {/* <JsonToTable
                       hover
                       className="user-table align-items-center"
                       json={table.table_data.data}
                     /> */}
-                      {/* 
-                    <Button type="submit" id="btn" onClick={onSaveData}>
-                      save
-                    </Button> */}
+
                       <Table
                         columns={table.table_data.columns}
                         data={table.table_data.data}
                         table_idx={idx}
                         page_idx={table.page}
-                        dispatch={dispatch}
-                        skipReset={state.skipReset}
+                        dispatch={context.dispatch}
+                        skipReset={context.state.skipReset}
                       />
                     </Col>
                   </Row>
@@ -238,18 +188,25 @@ export default () => {
             );
           })}
       </Accordion>
-      <Row>
-        <Col>
-          <Link
-            to={{
-              pathname: `/ViewTableData/${params["id"]}`,
-            }}
-          >
-            <Button> View Table Data </Button>
-          </Link>
-          <Button onClick={(e) => SaveTableData(e)}>Save Table Data</Button>
-        </Col>
-      </Row>
+      <div className="d-lg-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+        <Row xs="auto">
+          <Col>
+            <Button onClick={(e) => checkTableData(e)}>Check Table Data</Button>
+          </Col>
+          <Col>
+            <Button onClick={(e) => saveTableData()}>Save Table Data</Button>
+          </Col>
+          <Col>
+            <Link
+              to={{
+                pathname: `/ViewTableData/${params["id"]}`,
+              }}
+            >
+              <Button> View Table Data </Button>
+            </Link>
+          </Col>
+        </Row>
+      </div>
     </>
   );
 };

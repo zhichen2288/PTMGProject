@@ -70,6 +70,17 @@ class Education(EmbeddedDocument):
     department = StringField(max_length=40, null=True)
 
 
+class TabContent(EmbeddedDocument):
+    name = StringField(required=True)
+    GPA = StringField()
+    data = StringField()
+
+
+class ConsolidatedData(EmbeddedDocument):
+    tabs = ListField(default=[])
+    tabContent = ListField(EmbeddedDocumentField(TabContent), default=[])
+
+
 class Student(Document):
     """
     Anyhow, students are the subjects that we are interested.
@@ -77,9 +88,30 @@ class Student(Document):
     name = StringField(max_length=40)
     gpa = DecimalField(default=0.00, min_value=0, max_value=4, precision=2)
     transcript = EmbeddedDocumentField(Transcript, default=Transcript())
-    consolidatedData = StringField()
+    consolidatedData = EmbeddedDocumentField(ConsolidatedData, default=ConsolidatedData())
     education = EmbeddedDocumentField(Education, default=Education())
     status = StringField(default="NEW")
+
+
+class score_scheme(EmbeddedDocument):
+    score_from = DecimalField()
+    score_to = DecimalField()
+    usgrade = StringField() 
+
+
+class grade_scheme(EmbeddedDocument):
+    transcript_grade = StringField()
+    scale = DecimalField()
+    usgrade = StringField()
+
+
+class Conversion(Document):
+    university = StringField()
+    country = StringField()
+    SG_base = StringField()
+    score_scheme = EmbeddedDocumentField(score_scheme, default=score_scheme)
+    grade_scheme = EmbeddedDocumentField(grade_scheme, default = grade_scheme)
+
 
 class StudentTable(Document):
     course = StringField()
