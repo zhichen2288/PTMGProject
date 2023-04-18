@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import ContentEditable from "react-contenteditable";
 import { usePopper } from "react-popper";
 import { ActionTypes, DataTypes } from "../../utils/studentTable";
 import "../../../scss/style.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinusSquare } from "@fortawesome/free-solid-svg-icons";
+import StateContext from "../../../context/stateContext";
+
 export default function Cell({
   value: initialValue,
   row: { index },
   column: { id, dataType, options },
   dataDispatch,
+  table_idx,
 }) {
   const [value, setValue] = useState({ value: initialValue, update: false });
   const [selectRef, setSelectRef] = useState(null);
@@ -18,6 +23,7 @@ export default function Cell({
     placement: "bottom-start",
     strategy: "fixed",
   });
+  const context = useContext(StateContext);
 
   function handleOptionKeyDown(e) {
     if (e.key === "Enter") {
@@ -51,21 +57,84 @@ export default function Cell({
     setValue({ value: e.target.value, update: false });
   }
 
-  function getCellElement() {
-    return (
-      <ContentEditable
-        html={(value.value && value.value.toString()) || ""}
-        onChange={onChange}
-        onBlur={() => setValue((old) => ({ value: old.value, update: true }))}
-        className="data-input"
-      />
-    );
-  }
+  // function getCellElement() {
+  //   return (
+  //     <ContentEditable
+  //       html={(value.value && value.value.toString()) || ""}
+  //       onChange={onChange}
+  //       onBlur={() => setValue((old) => ({ value: old.value, update: true }))}
+  //       className="data-input"
+  //     />
+  //   );
+  // }
   useEffect(() => {
     if (addSelectRef && showAdd) {
       addSelectRef.focus();
     }
   }, [addSelectRef, showAdd]);
+
+  function getCellElement() {
+    let columnId = id;
+    let rowId = index;
+    let invalidCell = false;
+    let message = "";
+    if (context.state.highlightCellData !== "") {
+      for (const [key, value] of Object.entries(
+        context.state.highlightCellData
+      )) {
+        for (let [k, v] of Object.entries(value)) {
+          debugger;
+          if (key === table_idx.toString()) {
+            if (k !== "message") {
+              k = parseInt(k);
+              k = k % 7;
+              const invalidRows = v;
+              if (columnId === k.toString() && invalidRows.includes(rowId)) {
+                invalidCell = true;
+              }
+            } else {
+              message = v.toString();
+            }
+          }
+        }
+      }
+    }
+
+    switch (dataType) {
+      case "text":
+        return (
+          <ContentEditable
+            title={message === "" ? "" : message}
+            html={(value.value && value.value.toString()) || ""}
+            onChange={onChange}
+            onBlur={() =>
+              setValue((old) => ({ value: old.value, update: true }))
+            }
+            className={`data-input invalidCell-${invalidCell}`}
+          />
+        );
+      case "options":
+        return (
+          <span
+            className="delete-row-btn"
+            onClick={() => {
+              let result = window.confirm("Are you sure you want to delete?");
+              if (result) {
+                dataDispatch({
+                  type: ActionTypes.DELETE_ROW,
+                  rowIndex: index,
+                });
+              }
+            }}
+            title="Delete row"
+          >
+            <FontAwesomeIcon icon={faMinusSquare} />
+          </span>
+        );
+      default:
+        return <span></span>;
+    }
+  }
 
   useEffect(() => {
     setValue({ value: initialValue, update: false });
