@@ -53,35 +53,42 @@ class DataCheck:
             unique_grade = self.df["Grade"].unique()
             unique_grade = unique_grade.tolist()
 
-            # access mongodb and get conversion
+            # access mongodb and get conversion 
             client = pymongo.MongoClient()
             db = client["PTMG"]
             collection = db["conversion"]
             collection_df = pd.DataFrame(collection.find({}))
-           
+            
             university_document = collection_df[collection_df["university"] == self.school_name]
-           
+            
             # deal with the situation when the school name is inside the database
             if len(university_document) != 0:
-                university_document_idx = university_document.index[0]
-                conversion_df = pd.DataFrame(university_document['grade_scheme'][university_document_idx])
-                transcript_grade = conversion_df["transcript grade"].tolist()
+                university_sr = university_document.iloc[0, :]
+                conversion_df = pd.DataFrame(university_sr['grade_scheme'])
+                transcript_grade = conversion_df["transcript_grade"].tolist()
+                
+            elif len(university_document) == 0:
+                university_document = collection_df[collection_df["university"] == "China General Grade"]
+                university_sr = university_document.iloc[0, :]
+                conversion_df = pd.DataFrame(university_sr['grade_scheme'])
+                transcript_grade = conversion_df["transcript_grade"].tolist()
                
-                unknown_grade = []
-                for i_grade in unique_grade:
-                    # standardize
-                    i_grade_stdd = i_grade.strip()
-                    i_grade_stdd = i_grade_stdd.upper()
+            
+            unknown_grade = []
+            for i_grade in unique_grade:
+                # standardize 
+                i_grade_stdd = i_grade.strip()
+                i_grade_stdd = i_grade_stdd.upper()
 
-                    if i_grade_stdd not in transcript_grade:
-                        unknown_grade.append(i_grade)
-               
-                ug_outlier_list = []
-                for i_unknown_grade in unknown_grade:
-                    condition = self.df["Grade"] == i_unknown_grade
-                    i_ug_idx = self.df[condition].index.tolist()
-                    ug_outlier_list.append(i_ug_idx)
-                   
-                flatten_ug_outlier_list = flatten(ug_outlier_list)
-           
-                return  "Grade", flatten_ug_outlier_list
+                if i_grade_stdd not in transcript_grade:
+                    unknown_grade.append(i_grade)
+
+            ug_outlier_list = []
+            for i_unknown_grade in unknown_grade:
+                condition = self.df["Grade"] == i_unknown_grade
+                i_ug_idx = self.df[condition].index.tolist()
+                ug_outlier_list.append(i_ug_idx)
+
+            flatten_ug_outlier_list = flatten(ug_outlier_list)
+
+            return  "Grade", flatten_ug_outlier_list

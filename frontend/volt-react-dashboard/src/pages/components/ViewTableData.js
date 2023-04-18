@@ -32,6 +32,7 @@ export default () => {
         const responseData = JSON.parse(response.data.data);
         if (responseData.tabContent && responseData.tabContent.length > 0) {
           responseData.tabContent.forEach((element) => {
+            debugger
             if (element.data === "") {
               tabData.push({
                 tabName: element.name,
@@ -63,13 +64,14 @@ export default () => {
     };
     fetchData();
     document.title = `View Table Data`;
-  }, []);
+  }, [calcgpaText]);
 
   async function calculateGPA(e, tabName) {
     const response = await axios.get(
       `/api/students/${params["id"]}/transcript?action=calculateGPA&tabname=${tabName}`
     );
     if (response.data.result) {
+      debugger
       setcalcgpaText(response.data.result);
     }
   }
@@ -209,7 +211,7 @@ export default () => {
                       id="gpaText"
                       name="gpaText"
                       onChange={handleChange}
-                      value={tab.GPA}
+                      value={`  ${tab.gpa}`}
                     />
                   </InputGroup>
                 </Col>

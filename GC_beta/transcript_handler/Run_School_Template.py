@@ -18,9 +18,6 @@ def get_page_data(student):
    
     # ret = collection.find_one({'_id': sid})
 
-
-    processed_transcripts = student.transcript.processed_data
-    university = student.education.university
    
     '''
     {"id": __,
@@ -52,15 +49,17 @@ def get_page_data(student):
     }
    
     '''
-   
+    
    
     # Get School Info
-    school_name = university
+    school_name = student.education.university
 
     # Get table list
+    processed_data = student.transcript.processed_data
+
     table_list = []
-    for i in range(len(processed_transcripts)):
-        i_table = processed_transcripts[i]["table_data"]
+    for i in range(len(processed_data)):
+        i_table = processed_data[i]["table_data"]
         i_table = json.loads(i_table)
        
         table_list.append(i_table)
@@ -69,7 +68,7 @@ def get_page_data(student):
 
 
 def run_school_template(sid, student):
-   
+    
     school_name, table_list = get_page_data(student)
    
     table_df = pd.DataFrame()
@@ -102,14 +101,21 @@ def run_school_template(sid, student):
             i_row[i_column[1]] = i_data[i_column[0]]
         data_list.append(i_row)
 
+
     tabContent = []
     tabs = []
     tabs.append("main")
     tabs.append("math")
+    tabs.append("programming")
+    tabs.append("language")
     maintab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
     mathtab = TabContent(name = "math", data = "", GPA = "")
+    programmingtab = TabContent(name = "programming", data = "", GPA = "")
+    languagetab = TabContent(name = "language", data = "", GPA = "")
     tabContent.append(maintab)
     tabContent.append(mathtab)
+    tabContent.append(programmingtab)
+    tabContent.append(languagetab)
 
     consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabContent)
    

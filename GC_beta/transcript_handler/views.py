@@ -205,7 +205,7 @@ def student_transcript(request, pk):
                 output_dict = run_school_template(student.id, student)
                 student.consolidatedData = output_dict
                 student.save()
-
+                
             processed_transcripts = student.consolidatedData
             consolidated_data_dict = student.consolidatedData.to_mongo()
             json_string = json.dumps(consolidated_data_dict, default=json_util.default)
@@ -221,7 +221,8 @@ def student_transcript(request, pk):
                 return JsonResponse({'error': "student not found."}, status=404)
             tabName = request.GET.get('tabname')
             result = GPA(student.id, tabName)
-            return JsonResponse({'student_name': student.name, 'result': result.calculate_GPA()})
+            gpa = result.calculate_GPA()
+            return JsonResponse({'student_name': student.name, 'result': str(gpa)})
 
     elif request.method == 'POST':  # add new transcripts, default is override
         studentId = pk
