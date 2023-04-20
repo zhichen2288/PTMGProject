@@ -11,6 +11,7 @@ const initialState = {
   highlightCellData: "",
   images: [],
   consolidatedData: [],
+  resetConsolidatedData: false,
 };
 
 function reducer(state, action) {
@@ -59,6 +60,12 @@ function reducer(state, action) {
         draft.data[state.table_idx].table_data.data[action.rowIndex][
           action.columnId
         ] = action.value;
+        draft.resetConsolidatedData = true;
+      });
+
+    case ActionTypes.RESET_CONSOLIDATED_DATA:
+      return produce(state, (draft) => {
+        draft.resetConsolidatedData = false;
       });
 
     case ActionTypes.ADD_COLUMN_TO_LEFT:
@@ -125,6 +132,7 @@ function reducer(state, action) {
           element["0"] = i + 1;
         });
         draft.highlightCellData = "";
+        draft.resetConsolidatedData = true;
       });
 
     case ActionTypes.HIGHLIGHT_CELL:

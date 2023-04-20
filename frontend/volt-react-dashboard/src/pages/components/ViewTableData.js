@@ -42,7 +42,6 @@ export default () => {
         const responseData = JSON.parse(response.data.data);
         if (responseData.tabContent && responseData.tabContent.length > 0) {
           responseData.tabContent.forEach((element) => {
-            debugger
             if (element.data === "") {
               tabData.push({
                 tabName: element.name,
@@ -81,7 +80,7 @@ export default () => {
       `/api/students/${params["id"]}/transcript?action=calculateGPA&tabname=${tabName}`
     );
     if (response.data.result) {
-      debugger
+      debugger;
       setcalcgpaText(response.data.result);
     }
   }
@@ -153,18 +152,14 @@ export default () => {
             className="d-none d-md-inline-block"
             listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
           >
-            <Breadcrumb.Item>
-              <Link to="..">
-                <FontAwesomeIcon icon={faHome} />
-              </Link>
+            <Breadcrumb.Item href="..">
+              <FontAwesomeIcon icon={faHome} />
             </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link to="../students">Students List</Link>
+            <Breadcrumb.Item href="../#/students">
+              Students List{" "}
             </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link to={`../view-transcripts/${params.id}`}>
-                Prepared Transcripts
-              </Link>
+            <Breadcrumb.Item href={`../#/view-transcripts/${params.id}`}>
+              Prepared Transcripts
             </Breadcrumb.Item>
             <Breadcrumb.Item active>View Table Data</Breadcrumb.Item>
           </Breadcrumb>

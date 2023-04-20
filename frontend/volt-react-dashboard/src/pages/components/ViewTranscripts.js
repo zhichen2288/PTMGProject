@@ -51,6 +51,11 @@ export default () => {
 
   useEffect(() => {
     saveTableData();
+    console.log("before", context.state.resetConsolidatedData);
+    if (context.state.resetConsolidatedData) {
+      resetConsolidatedData();
+      console.log("after", context.state.resetConsolidatedData);
+    }
   }, [context.state]);
 
   async function saveTableData() {
@@ -75,6 +80,19 @@ export default () => {
         data: data,
       }
     );
+  }
+
+  // useEffect(() => {}, [context.state.resetConsolidatedData]);
+
+  async function resetConsolidatedData() {
+    const response = await axios.get(
+      `/api/students/${params["id"]}/transcript?action=reset_consolidated_data`
+    );
+    if (response.status === 200) {
+      context.dispatch({
+        type: ActionTypes.RESET_CONSOLIDATED_DATA,
+      });
+    }
   }
 
   async function checkTableData(e) {
@@ -106,18 +124,14 @@ export default () => {
             className="d-none d-md-inline-block"
             listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
           >
-            <Breadcrumb.Item>
-              <Link to="..">
-                <FontAwesomeIcon icon={faHome} />
-              </Link>
+            <Breadcrumb.Item href="..">
+              <FontAwesomeIcon icon={faHome} />
             </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link to="../students">Students List</Link>
+            <Breadcrumb.Item href="../#/students">
+              Students List{" "}
             </Breadcrumb.Item>
-            <Breadcrumb.Item active>
-              <Link to={`../view-transcripts/${params.id}`}>
-                Prepared Transcripts
-              </Link>
+            <Breadcrumb.Item active href={`../view-transcripts/${params.id}`}>
+              Prepared Transcripts
             </Breadcrumb.Item>
           </Breadcrumb>
           <h4>Prepared Transcripts</h4>

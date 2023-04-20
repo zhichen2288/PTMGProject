@@ -119,7 +119,7 @@ def update_transcript(request, pk):
             tables.append(new_table)
         
         student.transcript.processed_data = tables
-        student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
+        # student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
         student.save()
 
     return JsonResponse({}, status=200)
@@ -224,6 +224,18 @@ def student_transcript(request, pk):
             result = GPA(student.id, tabName)
             gpa = result.calculate_GPA()
             return JsonResponse({'student_name': student.name, 'result': str(gpa)})
+        
+        elif request.GET.get('action') == 'reset_consolidated_data':
+            student = None
+            try:
+                student = Student.objects.get(id=pk)
+            except:
+                return JsonResponse({'error': "student not found."}, status=404)
+            
+            student.consolidatedData = ConsolidatedData(tabs=[], tabContent=[])
+            student.save()
+            return JsonResponse({'student_name': student.name, 'result': "success"})
+        
 
     elif request.method == 'POST':  # add new transcripts, default is override
         studentId = pk
