@@ -169,17 +169,25 @@ def run_data_check(sid):
            
            
         if table_outlier:
-            outlier_list = {}
-            message_list = [i_table_outlier[0] for i_table_outlier in table_outlier]
-            outlier_list["message"] = message_list
+#             outlier_list = {}
+#             message_list = [i_table_outlier[0] for i_table_outlier in table_outlier]
+#             outlier_list["message"] = message_list
 
+#             for j in range(len(table_outlier)):
+#                 i_column = int(table_outlier[j][1][0])
+#                 i_column_mol = i_column + 7*(j+1)
+#                 outlier_list[i_column_mol] = table_outlier[j][2]
+               
+               
+            outlier_list = {}
             for j in range(len(table_outlier)):
                 i_column = int(table_outlier[j][1][0])
-                i_column_mol = i_column + 7*(j+1)
-                outlier_list[i_column_mol] = table_outlier[j][2]
+                i_column_mol = i_column + 7*(i+1)
+                outlier_list[i_column_mol] = {"rows": table_outlier[j][2],
+                                              "message": table_outlier[j][0]}
 
             total_outlier_list[i] = outlier_list
-
+       
     total_outlier_list = json.dumps(total_outlier_list)
        
     return total_outlier_list

@@ -175,7 +175,7 @@ export default () => {
                       </Document> */}
                     </Col>
                     {/* Ry*/}
-                    <Col>
+                    <Col key={idx}>
                       {/* <JsonToTable
                       hover
                       className="user-table align-items-center"
@@ -189,6 +189,7 @@ export default () => {
                         page_idx={table.page}
                         dispatch={context.dispatch}
                         skipReset={context.state.skipReset}
+                        key={idx}
                       />
                     </Col>
                   </Row>
