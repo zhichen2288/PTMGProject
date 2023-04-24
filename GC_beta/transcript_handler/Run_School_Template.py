@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 import json
 from .System_School_Template import SchoolTemplate
 from .models import University, Department, Transcript, ProcessedTable, TabContent, ConsolidatedData
-
+from .System_ReconizeCourse import ReconizeCourse
 
 def get_page_data(student):
     # Access mongoDB
@@ -67,7 +67,7 @@ def get_page_data(student):
     return school_name, table_list
 
 
-def run_school_template(sid, student):
+def run_school_template(student):
     
     school_name, table_list = get_page_data(student)
    
@@ -101,6 +101,8 @@ def run_school_template(sid, student):
             i_row[i_column[1]] = i_data[i_column[0]]
         data_list.append(i_row)
 
+    RC = ReconizeCourse(data_list)
+    math, programming, language = RC.generate_math_programming_language()
 
     tabContent = []
     tabs = []
@@ -108,19 +110,41 @@ def run_school_template(sid, student):
     tabs.append("math")
     tabs.append("programming")
     tabs.append("language")
+
     if(len(data_list) == 0):
         maintab = TabContent(name = "main", data = "", GPA = "")
     else:
         maintab = TabContent(name = "main", data = json.dumps(data_list), GPA = "")
 
-    mathtab = TabContent(name = "math", data = "", GPA = "")
-    programmingtab = TabContent(name = "programming", data = "", GPA = "")
-    languagetab = TabContent(name = "language", data = "", GPA = "")
+    if(len(math) == 0):
+        mathtab = TabContent(name = "math", data = "", GPA = "")
+    else:
+        mathtab = TabContent(name = "math", data = json.dumps(math), GPA = "")
+
+    if(len(programming) == 0):
+        programmingtab = TabContent(name = "programming", data = "", GPA = "")
+    else:
+        programmingtab = TabContent(name = "programming", data = json.dumps(programming), GPA = "")
+
+    if(len(language) == 0):
+        languagetab = TabContent(name = "language", data = "", GPA = "")
+    else:
+        languagetab = TabContent(name = "language", data = json.dumps(language), GPA = "")
+
+
     tabContent.append(maintab)
     tabContent.append(mathtab)
     tabContent.append(programmingtab)
     tabContent.append(languagetab)
 
     consolidatedData = ConsolidatedData(tabs = tabs, tabContent = tabContent)
-   
+
+
+    # # generate the math, tool, language table
+    # sid = ObjectId("643c78d7b4babd7287776bb0")
+
+    # print(m)
+    # print(p)
+    # print(l)
+
     return consolidatedData

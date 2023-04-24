@@ -83,18 +83,16 @@ export default function Cell({
         context.state.highlightCellData
       )) {
         for (let [k, v] of Object.entries(value)) {
-          debugger;
           if (key === table_idx.toString()) {
-            if (k !== "message") {
-              k = parseInt(k);
-              k = k % 7;
-              const invalidRows = v;
-              if (columnId === k.toString() && invalidRows.includes(rowId)) {
-                invalidCell = true;
-              }
-            } else {
-              message = v.toString();
+            k = parseInt(k);
+            k = k % 7;
+            const invalidRows = v.rows;
+            if (columnId === k.toString() && invalidRows.includes(rowId)) {
+              invalidCell = true;
+              message = v.message;
             }
+            //} else {
+            //message = v.toString();
           }
         }
       }

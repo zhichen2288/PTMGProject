@@ -138,7 +138,7 @@ export default function ViewTable({
           })}
         </tbody>
       </table>
-      {rowSelection && (
+      {/* {rowSelection && (
         <pre>
           <code>
             {JSON.stringify(
@@ -153,7 +153,7 @@ export default function ViewTable({
             )}
           </code>
         </pre>
-      )}
+      )} */}
     </>
   );
 }

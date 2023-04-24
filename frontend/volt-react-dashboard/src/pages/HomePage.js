@@ -123,7 +123,6 @@ const RouteWithSidebar = ({ component: Component, ...rest }) => {
 
 export default () => {
   const [state, dispatch] = useReducer(reducer.reducer, reducer.initialState);
-  console.log("homepage", state);
   return (
     <StateContext.Provider value={{ state, dispatch }}>
       <Switch>

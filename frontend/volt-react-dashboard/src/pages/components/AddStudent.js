@@ -95,9 +95,6 @@ export default () => {
                     name="name"
                     onChange={handleInputChange}
                   />
-                  <Form.Text className="text-muted">
-                    Please input a single word.
-                  </Form.Text>
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="universityName">
                   <Form.Label>University</Form.Label>

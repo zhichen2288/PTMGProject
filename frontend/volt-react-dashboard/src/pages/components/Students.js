@@ -215,7 +215,6 @@ export default () => {
   }
 
   const handleUpload = () => {
-    debugger;
     let snippedImages = [];
     if (context.state.images.length >= 1) {
       snippedImages = deepCopy(context.state.images);
@@ -259,7 +258,7 @@ export default () => {
             className="d-none d-md-inline-block"
             listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
           >
-            <Breadcrumb.Item>
+            <Breadcrumb.Item href="..">
               <FontAwesomeIcon icon={faHome} />
             </Breadcrumb.Item>
             <Breadcrumb.Item active>Students List</Breadcrumb.Item>

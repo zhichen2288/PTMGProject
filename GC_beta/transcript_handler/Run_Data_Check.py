@@ -6,15 +6,15 @@ import json
 from .System_Data_Check import DataCheck
 
 
-def get_page_data(sid):
+def get_page_data(student):
     # Access mongoDB
-    client = pymongo.MongoClient()
-    db=client.PTMG
-    collection = db.student
-    # * collection is like a table to hold document
-    #   document is the thing we store in mongodb
+    # client = pymongo.MongoClient()
+    # db=client["PTMG"]
+    # collection = db.student
+    # # * collection is like a table to hold document
+    # #   document is the thing we store in mongodb
    
-    ret = collection.find_one({'_id': sid})
+    # sid_document = collection.find_one({'_id': sid})
    
     '''
     {"id": __,
@@ -49,13 +49,15 @@ def get_page_data(sid):
    
    
     # Get School Info
-    school_name = ret['education']['university']
+    school_name = student.education.university
 
    
     # Get Page Info
+    processed_data = student.transcript.processed_data
+
     table_list = []
-    for i in range(len(ret['transcript']['processed_data'])):
-        i_table = ret['transcript']['processed_data'][i]["table_data"]
+    for i in range(len(processed_data)):
+        i_table = processed_data[i]["table_data"]
         i_table = json.loads(i_table)
        
         table_list.append(i_table)
@@ -63,8 +65,7 @@ def get_page_data(sid):
     return school_name, table_list
 
 
-
-def run_data_check(sid):
+def run_data_check(student):
     def find_id(table_data):
         score_synonym = ["score", "mark", "scores", "marks obtained",
                          "obt", "marks obtained", "record", "scroe", "marks"]
@@ -103,7 +104,7 @@ def run_data_check(sid):
         return query_score, query_credit, query_grade
    
    
-    school_name, table_list = get_page_data(sid)
+    school_name, table_list = get_page_data(student)
    
     total_outlier_list = {}
    
@@ -170,17 +171,25 @@ def run_data_check(sid):
            
            
         if table_outlier:
-            outlier_list = {}
-            message_list = [i_table_outlier[0] for i_table_outlier in table_outlier]
-            outlier_list["message"] = message_list
+#             outlier_list = {}
+#             message_list = [i_table_outlier[0] for i_table_outlier in table_outlier]
+#             outlier_list["message"] = message_list
 
+#             for j in range(len(table_outlier)):
+#                 i_column = int(table_outlier[j][1][0])
+#                 i_column_mol = i_column + 7*(j+1)
+#                 outlier_list[i_column_mol] = table_outlier[j][2]
+               
+               
+            outlier_list = {}
             for j in range(len(table_outlier)):
                 i_column = int(table_outlier[j][1][0])
                 i_column_mol = i_column + 7*(j+1)
-                outlier_list[i_column_mol] = table_outlier[j][2]
+                outlier_list[i_column_mol] = {"rows": table_outlier[j][2],
+                                              "message": table_outlier[j][0]}
 
             total_outlier_list[i] = outlier_list
-
+       
     total_outlier_list = json.dumps(total_outlier_list)
        
     return total_outlier_list
