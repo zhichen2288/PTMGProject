@@ -184,7 +184,7 @@ def run_data_check(student):
             outlier_list = {}
             for j in range(len(table_outlier)):
                 i_column = int(table_outlier[j][1][0])
-                i_column_mol = i_column + 7*(i+1)
+                i_column_mol = i_column + 7*(j+1)
                 outlier_list[i_column_mol] = {"rows": table_outlier[j][2],
                                               "message": table_outlier[j][0]}
 

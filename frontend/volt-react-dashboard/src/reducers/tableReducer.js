@@ -184,6 +184,8 @@ function reducer(state, action) {
       });
 
     case ActionTypes.DELETE_IMAGE_DATA: //imageCroppers/scroller.js
+      debugger;
+
       return produce(state, (draft) => {
         delete draft.images.splice(action.index, 1);
       });
