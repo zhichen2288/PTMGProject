@@ -33,6 +33,11 @@ class SchoolTemplate:
         collection = db["synonym"]
         collection_df = pd.DataFrame(collection.find({}))
         synonym_idx = collection_df.index[0]
+
+        #conversion_collection1 = Conversion.objects.as_pymongo()
+
+        
+
        
         course_synonym = collection_df["course_synonym"][synonym_idx]
         score_synonym = collection_df["score_synonym"][synonym_idx]

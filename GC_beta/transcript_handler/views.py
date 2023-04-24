@@ -191,7 +191,7 @@ def student_transcript(request, pk):
                 student = Student.objects.get(id=pk)
             except:
                 return JsonResponse({'error': "student not found."}, status=404)
-            processed_data = run_data_check(student.id)
+            processed_data = run_data_check(student)
             print(processed_data)
             return JsonResponse({'student_name': student.name, 'data':str(processed_data)})
 
@@ -203,7 +203,7 @@ def student_transcript(request, pk):
                 return JsonResponse({'error': "student not found."}, status=404)
             
             if(len(student.consolidatedData.tabContent) == 0):
-                output_dict = run_school_template(student.id, student)
+                output_dict = run_school_template(student)
                 student.consolidatedData = output_dict
                 student.save()
                 

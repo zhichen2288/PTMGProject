@@ -6,15 +6,15 @@ import json
 from .System_Data_Check import DataCheck
 
 
-def get_page_data(sid):
+def get_page_data(student):
     # Access mongoDB
-    client = pymongo.MongoClient()
-    db=client["PTMG"]
-    collection = db.student
-    # * collection is like a table to hold document
-    #   document is the thing we store in mongodb
+    # client = pymongo.MongoClient()
+    # db=client["PTMG"]
+    # collection = db.student
+    # # * collection is like a table to hold document
+    # #   document is the thing we store in mongodb
    
-    sid_document = collection.find_one({'_id': sid})
+    # sid_document = collection.find_one({'_id': sid})
    
     '''
     {"id": __,
@@ -49,13 +49,15 @@ def get_page_data(sid):
    
    
     # Get School Info
-    school_name = sid_document['education']['university']
+    school_name = student.education.university
 
    
     # Get Page Info
+    processed_data = student.transcript.processed_data
+
     table_list = []
-    for i in range(len(sid_document['transcript']['processed_data'])):
-        i_table = sid_document['transcript']['processed_data'][i]["table_data"]
+    for i in range(len(processed_data)):
+        i_table = processed_data[i]["table_data"]
         i_table = json.loads(i_table)
        
         table_list.append(i_table)
@@ -63,7 +65,7 @@ def get_page_data(sid):
     return school_name, table_list
 
 
-def run_data_check(sid):
+def run_data_check(student):
     def find_id(table_data):
         score_synonym = ["score", "mark", "scores", "marks obtained",
                          "obt", "marks obtained", "record", "scroe", "marks"]
@@ -102,7 +104,7 @@ def run_data_check(sid):
         return query_score, query_credit, query_grade
    
    
-    school_name, table_list = get_page_data(sid)
+    school_name, table_list = get_page_data(student)
    
     total_outlier_list = {}
    

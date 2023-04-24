@@ -25,8 +25,12 @@ class GPA():
         student_collection = db["student"]
         student_collection_df = pd.DataFrame(student_collection.find({}))
         
+        
         conversion_collection = db["conversion"]
         conversion_collection_df = pd.DataFrame(conversion_collection.find({}))
+        
+        #conversion_collection1 = Conversion.objects.as_pymongo()
+
         
         return student_collection_df, conversion_collection_df
             
