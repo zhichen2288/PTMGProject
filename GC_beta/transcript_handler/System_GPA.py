@@ -246,7 +246,6 @@ class GPA():
                 
             
             except:
-                ###### to be continue
                 self.school_name = "China General Grade"
                 GPA = self.grade_base_calculate_GPA()
             

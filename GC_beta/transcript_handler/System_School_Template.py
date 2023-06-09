@@ -90,37 +90,38 @@ class SchoolTemplate:
         output_data = []
 
         for i_row_data in row_data:
-            output_one = {}
+            if len(i_row_data) > 1  :
+                output_one = {}
 
-            if query_course:
-                if len(query_course) > 1:
-                    combine_course = []
-                    for i_query_course in query_course:
-                        combine_course.append(i_row_data[i_query_course])
-                    combine_course = "-".join(combine_course)
+                if query_course:
+                    if len(query_course) > 1:
+                        combine_course = []
+                        for i_query_course in query_course:
+                            combine_course.append(i_row_data[i_query_course])
+                        combine_course = "-".join(combine_course)
 
-                    output_one["Course"] = combine_course
-                else:
-                    output_one["Course"] = i_row_data[query_course[0]]
+                        output_one["Course"] = combine_course
+                    else:
+                        output_one["Course"] = i_row_data[query_course[0]]
 
 
-            if query_score:
-                output_one["Score"] = i_row_data[query_score[0]]
-               
-            if query_grade:
-                output_one["Grade"] = i_row_data[query_grade[0]]
+                if query_score:
+                    output_one["Score"] = i_row_data[query_score[0]]
+                
+                if query_grade:
+                    output_one["Grade"] = i_row_data[query_grade[0]]
 
-            if query_credit:
-                output_one["Credit"] = i_row_data[query_credit[0]]
+                if query_credit:
+                    output_one["Credit"] = i_row_data[query_credit[0]]
 
-            if query_min_mark:
-                output_one["Minimum Mark"] = i_row_data[query_min_mark[0]]
+                if query_min_mark:
+                    output_one["Minimum Mark"] = i_row_data[query_min_mark[0]]
 
-            if query_max_mark:
-                output_one["Maximum Mark"] = i_row_data[query_max_mark[0]]
+                if query_max_mark:
+                    output_one["Maximum Mark"] = i_row_data[query_max_mark[0]]
 
-            if output_one:
-                output_data.append(output_one)
+                if output_one:
+                    output_data.append(output_one)
            
         return output_data
    

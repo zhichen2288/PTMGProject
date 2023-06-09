@@ -80,7 +80,6 @@ export default () => {
             <Breadcrumb.Item active>Add Student</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Add Student</h4>
-          <p className="mb-0">Add a new student here.</p>
         </div>
       </div>
       <article>
@@ -124,7 +123,12 @@ export default () => {
                     name="department"
                     onChange={handleInputChange}
                   />
+                                                                    <Form.Text className="text-muted">
+                                         Optional
+                                     </Form.Text>
+
                 </Form.Group>
+
                 <Button variant="primary" type="submit">
                   Submit
                 </Button>

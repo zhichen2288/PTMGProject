@@ -59,6 +59,7 @@ export default () => {
   }, [context.state]);
 
   async function saveTableData() {
+    debugger
     if (context.state.data === "") return;
     //let result = window.confirm("Please make sure all changes are correct!");
     //if (!result) return;
@@ -217,7 +218,7 @@ export default () => {
                 pathname: `/ViewTableData/${params["id"]}`,
               }}
             >
-              <Button> View Table Data </Button>
+              <Button> Consolidate Data </Button>
             </Link>
           </Col>
         </Row>
